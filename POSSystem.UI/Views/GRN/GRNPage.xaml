@@ -10,6 +10,7 @@
         Width="1600"
         MinHeight="700"
         MinWidth="1200"
+         WindowState="Maximized"
         WindowStartupLocation="CenterScreen"
         Background="#FF0F0F1A"
         WindowStyle="SingleBorderWindow"
@@ -577,7 +578,8 @@
                                           Content="+ Add to GRN" 
                                           Style="{StaticResource GRNButtonPrimary}"
                                           Height="50"
-                                          FontSize="14"/>
+                                          FontSize="14"
+                                          Click="btnAddItem_Click"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
@@ -693,7 +695,7 @@
                                                      FontSize="12" 
                                                      Foreground="{StaticResource TextSecondary}"/>
                                             <TextBlock x:Name="txtSubtotal" 
-                                                     Text="$0.00" 
+                                                     Text="0.00" 
                                                      FontSize="20" 
                                                      FontWeight="Bold"
                                                      Foreground="{StaticResource TextPrimary}"/>
@@ -704,7 +706,7 @@
                                                      FontSize="12" 
                                                      Foreground="{StaticResource TextSecondary}"/>
                                             <TextBlock x:Name="txtTax" 
-                                                     Text="$0.00" 
+                                                     Text="0.00" 
                                                      FontSize="20" 
                                                      FontWeight="Bold"
                                                      Foreground="{StaticResource TextPrimary}"/>
@@ -715,7 +717,7 @@
                                                      FontSize="12" 
                                                      Foreground="{StaticResource TextSecondary}"/>
                                             <TextBlock x:Name="txtGrandTotal" 
-                                                     Text="$0.00" 
+                                                     Text="0.00" 
                                                      FontSize="24" 
                                                      FontWeight="Bold"
                                                      Foreground="{StaticResource SuccessGreen}"/>
