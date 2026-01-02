@@ -3,10 +3,405 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:POSSystem.UI"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
-    <Grid>
+        Title="POS Pro - Login"
+        Height="750"
+        Width="1200"
+        WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
+        ResizeMode="NoResize"
+        Background="Transparent"
+        AllowsTransparency="True">
 
+    <Window.Resources>
+        <!-- Modern Colors -->
+        <SolidColorBrush x:Key="PrimaryPurple" Color="#FF8B5DFF"/>
+        <SolidColorBrush x:Key="PrimaryPurpleLight" Color="#FF9D4DFF"/>
+        <SolidColorBrush x:Key="DarkBackground" Color="#FF0F0F1A"/>
+        <SolidColorBrush x:Key="DarkCard" Color="#FF1A1A2E"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0D0"/>
+
+        <!-- Gradient -->
+        <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FF8B5DFF" Offset="0"/>
+            <GradientStop Color="#FF3D8BFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- TextBox Style -->
+        <Style x:Key="ModernTextBox" TargetType="TextBox">
+            <Setter Property="Background" Value="#20FFFFFF"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- PasswordBox Style -->
+        <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
+            <Setter Property="Background" Value="#20FFFFFF"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="#40FFFFFF"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="PasswordBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="12">
+                            <Grid>
+                                <ScrollViewer x:Name="PART_ContentHost"
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                            </Trigger>
+                            <Trigger Property="IsFocused" Value="True">
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Button Style -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryGradient}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="12">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FF8F42FE"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#FF6F22DE"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Glass Effect -->
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#20FFFFFF"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CornerRadius" Value="24"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="#30FFFFFF"/>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Background="#FF0F0F1A">
+
+        <!-- Background Effects -->
+        <Grid>
+            <!-- Animated Background Circles -->
+            <Ellipse Width="600" Height="600" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-300,-300,0,0">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#408B5DFF" Offset="0"/>
+                        <GradientStop Color="#00000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+
+            <Ellipse Width="500" Height="500" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-250,-250">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#403D8BFF" Offset="0"/>
+                        <GradientStop Color="#00000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+            <Image HorizontalAlignment="Left" Height="104" Margin="250,128,0,0" VerticalAlignment="Top" Width="90" Source="/ready-stock.png"/>
+        </Grid>
+
+        <!-- Main Container -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Side - Branding -->
+            <Grid Grid.Column="0">
+                <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="450">
+                    <!-- Logo -->
+
+                    <!-- Brand Text -->
+                    <StackPanel>
+                        <TextBlock Text="POS PRO" 
+                                 FontSize="42" 
+                                 FontWeight="Bold" 
+                                 Foreground="{StaticResource TextPrimary}"
+                                 HorizontalAlignment="Center"
+                                 Margin="0,0,0,15"/>
+                        <TextBlock Text="Advanced Retail Management System" 
+                                 FontSize="18" 
+                                 Foreground="{StaticResource TextSecondary}"
+                                 HorizontalAlignment="Center"
+                                 TextAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Features -->
+                    <StackPanel Margin="0,50,0,0">
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Border Width="36" Height="36" CornerRadius="9" 
+                                    Background="#20FFFFFF" 
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="✓" 
+                                         FontSize="18" 
+                                         Foreground="{StaticResource PrimaryPurple}"
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Real-time Inventory Tracking" 
+                                     FontSize="15" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                            <Border Width="36" Height="36" CornerRadius="9" 
+                                    Background="#20FFFFFF" 
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="✓" 
+                                         FontSize="18" 
+                                         Foreground="{StaticResource PrimaryPurple}"
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Advanced Analytics &amp; Reports" 
+                                     FontSize="15" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="36" Height="36" CornerRadius="9" 
+                                    Background="#20FFFFFF" 
+                                    Margin="0,0,12,0">
+                                <TextBlock Text="✓" 
+                                         FontSize="18" 
+                                         Foreground="{StaticResource PrimaryPurple}"
+                                         HorizontalAlignment="Center" 
+                                         VerticalAlignment="Center"/>
+                            </Border>
+                            <TextBlock Text="Multi-store Support" 
+                                     FontSize="15" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+
+            <!-- Center Divider -->
+            <Border Grid.Column="1" 
+                    Width="1" 
+                    Margin="0,100,0,100">
+                <Border.Background>
+                    <LinearGradientBrush StartPoint="0,0" EndPoint="0,1">
+                        <GradientStop Color="#00FFFFFF" Offset="0"/>
+                        <GradientStop Color="#40FFFFFF" Offset="0.5"/>
+                        <GradientStop Color="#00FFFFFF" Offset="1"/>
+                    </LinearGradientBrush>
+                </Border.Background>
+            </Border>
+
+            <!-- Right Side - Login Form -->
+            <Grid Grid.Column="2">
+                <Border Style="{StaticResource GlassCard}" 
+                        Width="400"
+                        Height="600"
+                        VerticalAlignment="Center"
+                        HorizontalAlignment="Center">
+
+                    <StackPanel Margin="40" VerticalAlignment="Center">
+
+                        <!-- Header -->
+                        <StackPanel Margin="0,0,0,40">
+                            <TextBlock Text="Welcome Back!" 
+                                     FontSize="28" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"
+                                     Margin="0,0,0,10"/>
+                            <TextBlock Text="Sign in to access your dashboard" 
+                                     FontSize="14" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+
+                        <!-- Form -->
+                        <StackPanel>
+                            <!-- Username -->
+                            <TextBlock Text="Username or Email" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextSecondary}"
+                                     Margin="0,0,0,8"/>
+                            <TextBox x:Name="UsernameBox" 
+                                   Style="{StaticResource ModernTextBox}"
+                                   Height="45"/>
+
+                            <!-- Password -->
+                            <TextBlock Text="Password" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextSecondary}"
+                                     Margin="0,20,0,8"/>
+                            <PasswordBox x:Name="PasswordBox" 
+                                       Style="{StaticResource ModernPasswordBox}"
+                                       Height="45"/>
+
+                            <!-- Remember Me -->
+                            <CheckBox x:Name="RememberMeCheckBox" 
+                                    Content="Remember me"
+                                    Foreground="{StaticResource TextSecondary}"
+                                    FontSize="13"
+                                    Margin="0,20,0,25"/>
+
+                            <!-- Login Button -->
+                            <Button x:Name="LoginButton" 
+                                  Style="{StaticResource PrimaryButton}"
+                                  Height="50"
+                                  Margin="0,0,0,20"
+                                  Click="LoginButton_Click">
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <TextBlock Text="Sign In" 
+                                             FontSize="15" 
+                                             FontWeight="SemiBold"
+                                             Margin="0,0,10,0"/>
+                                    <TextBlock Text="→" 
+                                             FontSize="18"
+                                             VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Forgot Password -->
+                            <Button x:Name="ForgotPasswordButton" 
+                                  Content="Forgot Password?"
+                                  Background="Transparent"
+                                  Foreground="{StaticResource PrimaryPurple}"
+                                  BorderThickness="0"
+                                  Height="30"
+                                  FontSize="13"
+                                  Click="ForgotPasswordButton_Click"/>
+                        </StackPanel>
+
+                        <!-- Footer -->
+                        <StackPanel Margin="0,40,0,0">
+                            <TextBlock Text="Need help? Contact support@pospro.com" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextSecondary}"
+                                     HorizontalAlignment="Center"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- Close Button (Top Right) -->
+                <Button x:Name="CloseButton" 
+                      Width="32" 
+                      Height="32" 
+                      HorizontalAlignment="Right" 
+                      VerticalAlignment="Top"
+                      Margin="20,20,20,0"
+                      Background="#20FFFFFF"
+                      BorderThickness="0"
+                      Click="CloseButton_Click">
+                    <TextBlock Text="✕" 
+                             FontSize="16" 
+                             FontWeight="Bold" 
+                             Foreground="{StaticResource TextPrimary}"/>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <!-- Status Message -->
+        <Border x:Name="StatusMessage" 
+              Background="{StaticResource DarkCard}" 
+              CornerRadius="12"
+              Padding="20,15"
+              HorizontalAlignment="Center"
+              VerticalAlignment="Bottom"
+              Margin="0,0,0,30"
+              Visibility="Collapsed">
+            <StackPanel Orientation="Horizontal">
+                <Border Width="24" Height="24" CornerRadius="6" 
+                        Background="{StaticResource PrimaryPurple}"
+                        Margin="0,0,12,0">
+                    <TextBlock Text="!" 
+                             FontSize="14" 
+                             FontWeight="Bold"
+                             Foreground="White"
+                             HorizontalAlignment="Center" 
+                             VerticalAlignment="Center"/>
+                </Border>
+                <TextBlock x:Name="StatusText" 
+                         Text="" 
+                         FontSize="13" 
+                         Foreground="{StaticResource TextPrimary}"
+                         VerticalAlignment="Center"/>
+            </StackPanel>
+        </Border>
     </Grid>
 </Window>

@@ -1,0 +1,935 @@
+﻿<Window x:Class="POSSystem.UI.Views.Dashboard.Dashboard"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="POS Pro Dashboard"
+        Height="1025"
+        Width="1440"
+        MinHeight="700"
+        MinWidth="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF0F0F1A"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResizeWithGrip">
+
+    <Window.Resources>
+        <!-- Modern Color Palette -->
+        <SolidColorBrush x:Key="PrimaryPurple" Color="#FF8B5DFF"/>
+        <SolidColorBrush x:Key="PrimaryPurpleDark" Color="#FF6B3DFF"/>
+        <SolidColorBrush x:Key="SecondaryBlue" Color="#FF3D8BFF"/>
+        <SolidColorBrush x:Key="AccentCyan" Color="#FF00D4FF"/>
+        <SolidColorBrush x:Key="AccentPink" Color="#FFFF5CAA"/>
+        <SolidColorBrush x:Key="SuccessGreen" Color="#FF00E096"/>
+        <SolidColorBrush x:Key="WarningYellow" Color="#FFFFD166"/>
+        <SolidColorBrush x:Key="ErrorRed" Color="#FFFF5E7C"/>
+
+        <!-- Dark Theme -->
+        <SolidColorBrush x:Key="DarkBackground" Color="#FF0F0F1A"/>
+        <SolidColorBrush x:Key="DarkCard" Color="#FF1A1A2E"/>
+        <SolidColorBrush x:Key="DarkSurface" Color="#FF252540"/>
+        <SolidColorBrush x:Key="DarkBorder" Color="#FF3A3A5E"/>
+
+        <!-- Light Text -->
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0D0"/>
+        <SolidColorBrush x:Key="TextTertiary" Color="#FF8888AA"/>
+
+        <!-- Gradients -->
+        <LinearGradientBrush x:Key="PrimaryGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FF8B5DFF" Offset="0"/>
+            <GradientStop Color="#FF3D8BFF" Offset="1"/>
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="SuccessGradient" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Color="#FF00E096" Offset="0"/>
+            <GradientStop Color="#FF00B8D4" Offset="1"/>
+        </LinearGradientBrush>
+
+        <!-- Modern Card Button Style -->
+        <Style x:Key="ModernCardButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DarkCard}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DarkBorder}"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="140"/>
+            <Setter Property="Width" Value="220"/>
+            <Setter Property="Margin" Value="12,8"/>
+            <Setter Property="Padding" Value="20,15"/>
+            <Setter Property="Focusable" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="1"
+                                CornerRadius="16">
+                            <Grid>
+                                <Border x:Name="hoverOverlay" 
+                                        Background="Transparent" 
+                                        CornerRadius="16"
+                                        Opacity="0"/>
+                                <ContentPresenter HorizontalAlignment="Center"
+                                                VerticalAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource DarkSurface}"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="hoverOverlay" Property="Opacity" Value="0.1"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#2D2D4A"/>
+                                <Setter TargetName="border" Property="BorderThickness" Value="2"/>
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Glass Effect Style -->
+        <Style x:Key="GlassCard" TargetType="Border">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#20FFFFFF"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush">
+                <Setter.Value>
+                    <SolidColorBrush Color="#30FFFFFF"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CornerRadius" Value="16"/>
+        </Style>
+
+        <!-- Modern Sidebar Button -->
+        <Style x:Key="SidebarButton" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Height" Value="48"/>
+            <Setter Property="Padding" Value="20,0"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="Transparent"
+                                CornerRadius="12"
+                                Padding="20,0">
+                            <Grid>
+                                <Rectangle x:Name="activeIndicator" 
+                                           Fill="{StaticResource PrimaryPurple}" 
+                                           Width="4" 
+                                           HorizontalAlignment="Left"
+                                           Opacity="0"/>
+                                <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                                VerticalAlignment="Center"
+                                                Margin="15,0,0,0"/>
+                            </Grid>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="#20FFFFFF"/>
+                                    </Setter.Value>
+                                </Setter>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background">
+                                    <Setter.Value>
+                                        <SolidColorBrush Color="#30FFFFFF"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Modern Chip -->
+        <Style x:Key="ChipStyle" TargetType="Border">
+            <Setter Property="Background">
+                <Setter.Value>
+                    <SolidColorBrush Color="#20FFFFFF"/>
+                </Setter.Value>
+            </Setter>
+            <Setter Property="CornerRadius" Value="20"/>
+            <Setter Property="Padding" Value="12,6"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+        </Style>
+
+        <!-- Stat Card Style -->
+        <Style x:Key="StatCard" TargetType="Border">
+            <Setter Property="Background" Value="{StaticResource DarkCard}"/>
+            <Setter Property="CornerRadius" Value="16"/>
+            <Setter Property="Padding" Value="20"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DarkBorder}"/>
+        </Style>
+    </Window.Resources>
+
+    <!-- Main Container -->
+    <Grid>
+        <!-- Background Effects -->
+        <Grid Height="834" VerticalAlignment="Top">
+            <Ellipse Width="600" Height="600" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="-300,-300,0,0">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#408B5DFF" Offset="0"/>
+                        <GradientStop Color="#00000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+            <Ellipse Width="400" Height="400" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,-200,-200">
+                <Ellipse.Fill>
+                    <RadialGradientBrush>
+                        <GradientStop Color="#403D8BFF" Offset="0"/>
+                        <GradientStop Color="#00000000" Offset="1"/>
+                    </RadialGradientBrush>
+                </Ellipse.Fill>
+            </Ellipse>
+        </Grid>
+
+        <!-- Main Layout -->
+        <Grid Margin="20">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="80"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="50"/>
+            </Grid.RowDefinitions>
+
+            <!-- Top Header - CENTERED -->
+            <Border Grid.Row="0" Style="{StaticResource GlassCard}" Margin="0,0,0,20">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Logo & Brand -->
+                    <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="25,0">
+                        <Border Width="50" Height="50" CornerRadius="12" 
+                                Background="{StaticResource PrimaryGradient}" 
+                                Margin="0,0,15,0">
+                            <TextBlock Text="⚡" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="POS PRO" 
+                                     FontSize="22" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock Text="Advanced Retail System" 
+                                     FontSize="12" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- CENTERED MASTER DASHBOARD -->
+                    <Border Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Center">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="⭐" FontSize="22" VerticalAlignment="Center" Margin="0,0,12,0"/>
+                            <TextBlock Text="MASTER DASHBOARD" 
+                                     FontSize="18" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource PrimaryPurple}"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- User & Actions -->
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Margin="0,0,25,0" VerticalAlignment="Center">
+                        <Button Style="{StaticResource SidebarButton}" Width="40" Height="40" Padding="0" ToolTip="Search">
+                            <Border Background="{StaticResource DarkCard}" CornerRadius="10" Width="40" Height="40">
+                                <TextBlock Text="🔍" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Button>
+                        <Button Style="{StaticResource SidebarButton}" Width="40" Height="40" Padding="0" Margin="10,0" ToolTip="Notifications">
+                            <Border Background="{StaticResource DarkCard}" CornerRadius="10" Width="40" Height="40">
+                                <Grid>
+                                    <TextBlock Text="🔔" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    <Border Width="8" Height="8" CornerRadius="4" 
+                                            Background="{StaticResource AccentPink}" 
+                                            HorizontalAlignment="Right" VerticalAlignment="Top"
+                                            Margin="2,-2,0,0"/>
+                                </Grid>
+                            </Border>
+                        </Button>
+                        <Button Style="{StaticResource SidebarButton}" Width="40" Height="40" Padding="0" Margin="10,0" ToolTip="Profile">
+                            <Border Background="{StaticResource PrimaryGradient}" CornerRadius="10" Width="40" Height="40">
+                                <TextBlock Text="👤" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                            </Border>
+                        </Button>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- Main Content Area -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="280"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Sidebar -->
+                <Border Grid.Column="0" 
+                        Background="{StaticResource DarkCard}" 
+                        CornerRadius="20" 
+                        Margin="0,0,20,0">
+                    <ScrollViewer VerticalScrollBarVisibility="Auto">
+                        <StackPanel Margin="0">
+                            <!-- Sidebar Header -->
+                            <Border Padding="25,20" Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="Navigation" 
+                                             FontSize="16" 
+                                             FontWeight="Bold" 
+                                             Foreground="{StaticResource TextPrimary}"
+                                             Margin="0,0,0,8"/>
+                                    <TextBlock Text="Quick access to all modules" 
+                                             FontSize="12" 
+                                             Foreground="{StaticResource TextSecondary}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Menu Items -->
+                            <StackPanel Margin="15,0,15,25">
+                                <Button x:Name="DashboardMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="DashboardMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="📊" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Dashboard" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button x:Name="InventoryMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="InventoryMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="📦" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Inventory" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button x:Name="SalesMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="SalesMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="🧾" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Sales" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button x:Name="CustomersMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="CustomersMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="👥" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Customers" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button x:Name="AnalyticsMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="AnalyticsMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="📈" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Analytics" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <Button x:Name="SettingsMenuButton" Style="{StaticResource SidebarButton}" Margin="0,0,0,5" Click="SettingsMenuButton_Click">
+                                    <StackPanel Orientation="Horizontal">
+                                        <Border Width="32" Height="32" CornerRadius="8" 
+                                                Background="#20FFFFFF" 
+                                                Margin="0,0,15,0">
+                                            <TextBlock Text="⚙️" FontSize="16" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Settings" 
+                                                 Foreground="{StaticResource TextPrimary}" 
+                                                 FontSize="13"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+
+                            <!-- Quick Stats -->
+                            <Border Style="{StaticResource StatCard}" Margin="20,0,20,20">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
+                                        <Border Width="36" Height="36" CornerRadius="10" 
+                                                Background="{StaticResource PrimaryGradient}">
+                                            <TextBlock Text="📊" FontSize="18" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Today's Stats" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 Margin="12,0,0,0"
+                                                 VerticalAlignment="Center"/>
+                                    </StackPanel>
+
+                                    <!-- Revenue -->
+                                    <Border Background="#10FFFFFF" CornerRadius="12" Padding="15" Margin="0,0,0,10">
+                                        <StackPanel>
+                                            <TextBlock Text="Total Revenue" 
+                                                     FontSize="11" 
+                                                     Foreground="{StaticResource TextSecondary}"
+                                                     Margin="0,0,0,5"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="Rs:18000" 
+                                                         FontSize="20" 
+                                                         FontWeight="Bold" 
+                                                         Foreground="{StaticResource TextPrimary}"/>
+                                                <Border Style="{StaticResource ChipStyle}" Padding="6,3" Margin="12,0,0,0">
+                                                    <TextBlock Text="+12.5%" 
+                                                             FontSize="10" 
+                                                             FontWeight="Bold" 
+                                                             Foreground="{StaticResource SuccessGreen}"/>
+                                                </Border>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Orders -->
+                                    <Border Background="#10FFFFFF" CornerRadius="12" Padding="15">
+                                        <StackPanel>
+                                            <TextBlock Text="New Orders" 
+                                                     FontSize="11" 
+                                                     Foreground="{StaticResource TextSecondary}"
+                                                     Margin="0,0,0,5"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <TextBlock Text="24" 
+                                                         FontSize="20" 
+                                                         FontWeight="Bold" 
+                                                         Foreground="{StaticResource TextPrimary}"/>
+                                                <TextBlock Text="pending" 
+                                                         FontSize="11" 
+                                                         Foreground="{StaticResource TextSecondary}"
+                                                         Margin="8,0,0,0"
+                                                         VerticalAlignment="Bottom"/>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </Border>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </ScrollViewer>
+                </Border>
+
+                <!-- Main Dashboard -->
+                <ScrollViewer Grid.Column="1" VerticalScrollBarVisibility="Auto" Padding="5">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Welcome Section -->
+                        <Border Grid.Row="0" 
+                                Style="{StaticResource StatCard}" 
+                                Margin="0,0,0,25"
+                                Background="{StaticResource PrimaryGradient}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+
+                                <StackPanel>
+                                    <TextBlock Text="Welcome Back, Admin! 👋" 
+                                             FontSize="24" 
+                                             FontWeight="Bold" 
+                                             Foreground="{StaticResource TextPrimary}"
+                                             Margin="0,0,0,8"/>
+                                    <TextBlock Text="Here's what's happening with your store today." 
+                                             FontSize="14" 
+                                             Foreground="#E0FFFFFF"/>
+                                </StackPanel>
+
+                                <Border Grid.Column="1" 
+                                        Background="#40FFFFFF" 
+                                        CornerRadius="12" 
+                                        Padding="15"
+                                        VerticalAlignment="Center">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="🕒" FontSize="18" Margin="0,0,10,0"/>
+                                        <StackPanel>
+                                            <TextBlock Text="10:45 AM" 
+                                                     FontSize="16" 
+                                                     FontWeight="Bold" 
+                                                     Foreground="{StaticResource TextPrimary}"/>
+                                            <TextBlock Text="Current Time" 
+                                                     FontSize="11" 
+                                                     Foreground="#C0FFFFFF"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Border>
+                            </Grid>
+                        </Border>
+
+                        <!-- Quick Actions Grid -->
+                        <Grid Grid.Row="1">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Section Header -->
+                            <Border Grid.Row="0" Margin="0,0,0,20">
+                                <StackPanel>
+                                    <TextBlock Text="Quick Actions" 
+                                             FontSize="18" 
+                                             FontWeight="Bold" 
+                                             Foreground="{StaticResource TextPrimary}"
+                                             Margin="0,0,0,8"/>
+                                    <TextBlock Text="Access frequently used features" 
+                                             FontSize="13" 
+                                             Foreground="{StaticResource TextSecondary}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <!-- Cards Grid -->
+                            <UniformGrid Grid.Row="1" Columns="4" Rows="4" Margin="0">
+
+                                <!-- New Sale -->
+                                <Button x:Name="NewSaleButton" Style="{StaticResource ModernCardButton}" Click="NewSaleButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="{StaticResource SuccessGradient}"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="💳" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="New Sale" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Start transaction" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Inventory -->
+                                <Button x:Name="StockButton" Style="{StaticResource ModernCardButton}" Click="StockButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FFFFD166"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="📦" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Inventory" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Manage stock" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Customers -->
+                                <Button x:Name="CustomersButton" Style="{StaticResource ModernCardButton}" Click="CustomersButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF3D8BFF"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="👥" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Customers" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Client database" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Reports -->
+                                <Button x:Name="ReportsButton" Style="{StaticResource ModernCardButton}" Click="ReportsButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FFFF5CAA"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="📊" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Reports" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Sales analytics" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- GRN -->
+                                <Button x:Name="GRNButton" Style="{StaticResource ModernCardButton}" Click="GRNButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF00E096"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="🧾" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="GRN" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Goods receipt" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Purchase Orders -->
+                                <Button x:Name="PurchaseOrderButton" Style="{StaticResource ModernCardButton}" Click="PurchaseOrderButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF8B5DFF"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="📋" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Purchase Orders" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Create PO" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Invoice History -->
+                                <Button x:Name="InvoiceHistoryButton" Style="{StaticResource ModernCardButton}" Click="InvoiceHistoryButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF3D8BFF"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="📄" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Invoices" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="View history" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Quick Sale -->
+                                <Button x:Name="QuickSaleButton" Style="{StaticResource ModernCardButton}" Click="QuickSaleButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FFFFD166"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="⚡" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Quick Sale" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Fast checkout" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Stock Check -->
+                                <Button x:Name="StockCheckButton" Style="{StaticResource ModernCardButton}" Click="StockCheckButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF00D4FF"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="🔍" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Stock Check" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Search items" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Returns -->
+                                <Button x:Name="ReturnsButton" Style="{StaticResource ModernCardButton}" Click="ReturnsButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FFFF5E7C"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="🔄" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Returns" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Process returns" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Cash Drawer -->
+                                <Button x:Name="CashDrawerButton" Style="{StaticResource ModernCardButton}" Click="CashDrawerButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FF00E096"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="💰" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Cash Drawer" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="Manage cash" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+
+                                <!-- Settings -->
+                                <Button x:Name="SettingsButton" Style="{StaticResource ModernCardButton}" Click="SettingsButton_Click">
+                                    <StackPanel>
+                                        <Border Width="56" Height="56" CornerRadius="14" 
+                                                Background="#FFB0B0D0"
+                                                Margin="0,0,0,12">
+                                            <TextBlock Text="⚙️" FontSize="28" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <TextBlock Text="Settings" 
+                                                 FontSize="14" 
+                                                 FontWeight="Bold" 
+                                                 Foreground="{StaticResource TextPrimary}"
+                                                 HorizontalAlignment="Center"/>
+                                        <TextBlock Text="System config" 
+                                                 FontSize="11" 
+                                                 Foreground="{StaticResource TextSecondary}"
+                                                 HorizontalAlignment="Center"
+                                                 Margin="0,4,0,0"/>
+                                    </StackPanel>
+                                </Button>
+                            </UniformGrid>
+                        </Grid>
+                    </Grid>
+                </ScrollViewer>
+            </Grid>
+        </Grid>
+
+        <!-- Footer -->
+        <!-- Alternative: Adaptive Footer -->
+        <Border Grid.Row="2" 
+        Background="{StaticResource DarkCard}" 
+        CornerRadius="12" 
+        Margin="10,0,10,10"
+        VerticalAlignment="Bottom"
+        Height="55">
+
+            <Grid>
+                <!-- Responsive columns - adapts to screen width -->
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" MinWidth="400"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Status Info - Wraps on small screens -->
+                <WrapPanel Grid.Column="0" 
+                   VerticalAlignment="Center"
+                   Margin="15,0">
+                    <!-- System Status -->
+                    <StackPanel Orientation="Horizontal" 
+                        VerticalAlignment="Center"
+                        Margin="0,0,15,0">
+                        <Ellipse Width="8" Height="8" 
+                         Fill="{StaticResource SuccessGreen}" 
+                         Margin="0,0,6,0"
+                         VerticalAlignment="Center"/>
+                        <TextBlock Text="Online" 
+                         FontSize="11" 
+                         Foreground="{StaticResource TextPrimary}"
+                         VerticalAlignment="Center"/>
+                    </StackPanel>
+
+                    <!-- Separator -->
+                    <Rectangle Width="1" Height="12" 
+                       Fill="{StaticResource DarkBorder}" 
+                       Margin="0,0,15,0"
+                       VerticalAlignment="Center"/>
+
+                    <!-- Sync Time -->
+                    <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center"
+                        Margin="0,0,15,0">
+                        <TextBlock Text="Sync:" 
+                         FontSize="11" 
+                         Foreground="{StaticResource TextSecondary}"
+                         Margin="0,0,4,0"/>
+                        <TextBlock Text="10:42 AM" 
+                         FontSize="11" 
+                         FontWeight="Medium"
+                         Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+
+                    <!-- Separator -->
+                    <Rectangle Width="1" Height="12" 
+                       Fill="{StaticResource DarkBorder}" 
+                       Margin="0,0,15,0"
+                       VerticalAlignment="Center"/>
+
+                    <!-- Devices -->
+                    <StackPanel Orientation="Horizontal"
+                        VerticalAlignment="Center">
+                        <TextBlock Text="Devices:" 
+                         FontSize="11" 
+                         Foreground="{StaticResource TextSecondary}"
+                         Margin="0,0,4,0"/>
+                        <TextBlock Text="3" 
+                         FontSize="11" 
+                         FontWeight="Medium"
+                         Foreground="{StaticResource TextPrimary}"/>
+                    </StackPanel>
+                </WrapPanel>
+
+                <!-- Help & Support Buttons - Auto-collapse on small screens -->
+                <StackPanel Grid.Column="1" 
+                    x:Name="FooterButtonsPanel"
+                    Orientation="Horizontal" 
+                    VerticalAlignment="Center"
+                    Margin="0,0,15,0">
+
+                    <!-- Help Button -->
+                    <Button x:Name="HelpButton" 
+                    Style="{StaticResource SidebarButton}" 
+                    Padding="10,6"
+                    MinWidth="70"
+                    Margin="0,0,8,0" 
+                    Click="HelpButton_Click"
+                    ToolTip="Help">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="❓" 
+                             FontSize="13" 
+                             Margin="0,0,6,0"/>
+                            <TextBlock x:Name="HelpText" 
+                             Text="Help" 
+                             FontSize="11" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Docs Button -->
+                    <Button x:Name="DocsButton" 
+                    Style="{StaticResource SidebarButton}" 
+                    Padding="10,6"
+                    MinWidth="70"
+                    Margin="0,0,8,0" 
+                    Click="DocsButton_Click"
+                    ToolTip="Documentation">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="📚" 
+                             FontSize="13" 
+                             Margin="0,0,6,0"/>
+                            <TextBlock x:Name="DocsText" 
+                             Text="Docs" 
+                             FontSize="11" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Button>
+
+                    <!-- Refresh Button -->
+                    <Button x:Name="RefreshButton" 
+                    Style="{StaticResource SidebarButton}" 
+                    Padding="10,6"
+                    MinWidth="80"
+                    Click="RefreshButton_Click"
+                    ToolTip="Refresh Dashboard">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="🔄" 
+                             FontSize="13" 
+                             Margin="0,0,6,0"/>
+                            <TextBlock x:Name="RefreshText" 
+                             Text="Refresh" 
+                             FontSize="11" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

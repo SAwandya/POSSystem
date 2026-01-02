@@ -1,0 +1,549 @@
+﻿<Window x:Class="POSSystem.UI.Views.Customer.CustomerPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="Customer Management"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF0F0F1A"
+        WindowStyle="SingleBorderWindow"
+        WindowState="Maximized">
+
+    <Window.Resources>
+        <!-- Colors -->
+        <SolidColorBrush x:Key="PrimaryPurple" Color="#FF8B5DFF"/>
+        <SolidColorBrush x:Key="SecondaryBlue" Color="#FF3D8BFF"/>
+        <SolidColorBrush x:Key="SuccessGreen" Color="#FF00E096"/>
+        <SolidColorBrush x:Key="WarningYellow" Color="#FFFFD166"/>
+        <SolidColorBrush x:Key="ErrorRed" Color="#FFFF5E7C"/>
+        <SolidColorBrush x:Key="DarkBackground" Color="#FF0F0F1A"/>
+        <SolidColorBrush x:Key="DarkCard" Color="#FF1A1A2E"/>
+        <SolidColorBrush x:Key="DarkSurface" Color="#FF252540"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FF0F0F1A"/>
+
+        <!-- Button Styles -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryPurple}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="20,10"/>
+        </Style>
+
+        <Style x:Key="SecondaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DarkSurface}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="20,10"/>
+        </Style>
+
+        <!-- DataGrid Style -->
+        <Style x:Key="ModernDataGrid" TargetType="DataGrid">
+            <Setter Property="Background" Value="{StaticResource DarkCard}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DarkSurface}"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="RowBackground" Value="{StaticResource DarkCard}"/>
+            <Setter Property="AlternatingRowBackground" Value="{StaticResource DarkSurface}"/>
+            <Setter Property="HeadersVisibility" Value="Column"/>
+            <Setter Property="AutoGenerateColumns" Value="False"/>
+            <Setter Property="CanUserAddRows" Value="False"/>
+            <Setter Property="CanUserDeleteRows" Value="False"/>
+            <Setter Property="CanUserResizeRows" Value="False"/>
+            <Setter Property="SelectionMode" Value="Single"/>
+            <Setter Property="SelectionUnit" Value="FullRow"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource DarkCard}" 
+                CornerRadius="12" 
+                Padding="20" 
+                Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="50" Height="50" CornerRadius="12" 
+                            Background="{StaticResource PrimaryPurple}" 
+                            Margin="0,0,15,0">
+                        <TextBlock Text="👥" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="Customer Management" 
+                                 FontSize="24" 
+                                 FontWeight="Bold" 
+                                 Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Manage customer database, loyalty programs, and communications" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource TextSecondary}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Stats -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center">
+                    <Border CornerRadius="12" Margin="0,0,10,0" Padding="15,10"
+                            Background="{StaticResource DarkCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Customers" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock x:Name="TotalCustomersText" 
+                                     Text="0" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="12" Margin="0,0,10,0" Padding="15,10"
+                            Background="{StaticResource DarkCard}">
+                        <StackPanel>
+                            <TextBlock Text="Active Customers" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock x:Name="ActiveCustomersText" 
+                                     Text="0" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource SuccessGreen}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="12" Margin="0,0,10,0" Padding="15,10"
+                            Background="{StaticResource DarkCard}">
+                        <StackPanel>
+                            <TextBlock Text="Total Purchases" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock x:Name="TotalPurchasesText" 
+                                     Text="0.00" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource SecondaryBlue}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="12" Padding="15,10"
+                            Background="{StaticResource DarkCard}">
+                        <StackPanel>
+                            <TextBlock Text="Avg. Purchase" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                            <TextBlock x:Name="AvgPurchaseText" 
+                                     Text="0.00" 
+                                     FontSize="20" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource WarningYellow}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Actions -->
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center">
+                    <Button x:Name="RefreshButton" 
+                          Content="🔄 Refresh"
+                          Width="100"
+                          Height="40"
+                          Background="{StaticResource DarkSurface}"
+                          Foreground="{StaticResource TextPrimary}"
+                          BorderThickness="0"
+                          Margin="0,0,10,0"/>
+                    <Button x:Name="BackButton" 
+                          Content="← Dashboard"
+                          Width="100"
+                          Height="40"
+                          Background="{StaticResource DarkSurface}"
+                          Foreground="{StaticResource TextPrimary}"
+                          BorderThickness="0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Actions & Filters -->
+            <Border Grid.Column="0" 
+                    Background="{StaticResource DarkCard}" 
+                    CornerRadius="12" 
+                    Margin="0,0,10,0"
+                    Padding="20">
+                <StackPanel>
+                    <!-- Quick Actions -->
+                    <TextBlock Text="Quick Actions" 
+                             FontSize="16" 
+                             FontWeight="Bold" 
+                             Foreground="{StaticResource TextPrimary}"
+                             Margin="0,0,0,15"/>
+
+                    <StackPanel>
+                        <Button x:Name="AddCustomerButton" 
+                              Content="+ Add Customer"
+                              Height="40"
+                              Background="{StaticResource PrimaryPurple}"
+                              Foreground="White"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="ImportButton" 
+                              Content="📥 Import CSV"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="ExportButton" 
+                              Content="📤 Export List"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="SendEmailButton" 
+                              Content="✉️ Send Email"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="LoyaltyButton" 
+                              Content="🏆 Loyalty Points"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="BirthdayButton" 
+                              Content="🎂 Birthday List"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                    </StackPanel>
+
+                    <!-- Filters -->
+                    <TextBlock Text="Filters" 
+                             FontSize="16" 
+                             FontWeight="Bold" 
+                             Foreground="{StaticResource TextPrimary}"
+                             Margin="0,30,0,15"/>
+
+                    <StackPanel>
+                        <TextBlock Text="Search Customers" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource TextSecondary}"
+                                 Margin="0,0,0,5"/>
+                        <TextBox x:Name="SearchBox" 
+                               Background="#20FFFFFF"
+                               Foreground="{StaticResource TextPrimary}"
+                               Height="35"
+                               Padding="10"
+                               Margin="0,0,0,15"/>
+
+                        <TextBlock Text="Customer Type" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource DarkBackground}"
+                                 Margin="0,0,0,5"/>
+                        <ComboBox x:Name="TypeFilter" 
+                                Background="#20FFFFFF"
+                                Foreground="{StaticResource DarkBackground}"
+                                Height="35"
+                                Padding="10"
+                                Margin="0,0,0,15">
+                            <ComboBoxItem Content="All Types" IsSelected="True"/>
+                            <ComboBoxItem Content="Regular"/>
+                            <ComboBoxItem Content="Premium"/>
+                            <ComboBoxItem Content="VIP"/>
+                            <ComboBoxItem Content="Corporate"/>
+                        </ComboBox>
+
+                        <TextBlock Text="Status" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource TextSecondary}"
+                                 Margin="0,0,0,5"/>
+                        <StackPanel>
+                            <CheckBox x:Name="ActiveFilter" 
+                                    Content="Active" 
+                                    Foreground="{StaticResource TextPrimary}"
+                                    IsChecked="True"/>
+                            <CheckBox x:Name="InactiveFilter" 
+                                    Content="Inactive" 
+                                    Foreground="{StaticResource TextPrimary}"/>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <!-- Reports -->
+                    <TextBlock Text="Reports" 
+                             FontSize="16" 
+                             FontWeight="Bold" 
+                             Foreground="{StaticResource TextPrimary}"
+                             Margin="0,30,0,15"/>
+
+                    <StackPanel>
+                        <Button x:Name="PurchaseReportButton" 
+                              Content="💰 Purchase History"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="CreditReportButton" 
+                              Content="💳 Credit Report"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"
+                              Margin="0,0,0,10"/>
+                        <Button x:Name="PrintButton" 
+                              Content="🖨️ Print List"
+                              Height="40"
+                              Background="{StaticResource DarkSurface}"
+                              Foreground="{StaticResource TextPrimary}"
+                              BorderThickness="0"/>
+                    </StackPanel>
+                </StackPanel>
+            </Border>
+
+            <!-- Right Panel - Customer List -->
+            <Border Grid.Column="1" 
+                    Background="{StaticResource DarkCard}" 
+                    CornerRadius="12" 
+                    Padding="20">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Grid Header -->
+                    <Border Grid.Row="0" 
+                            Background="{StaticResource DarkSurface}" 
+                            CornerRadius="8" 
+                            Padding="15" 
+                            Margin="0,0,0,15">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+
+                            <TextBlock Text="Customer Database" 
+                                     FontSize="18" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <Button x:Name="EditButton" 
+                                      Content="Edit"
+                                      Width="80"
+                                      Height="40"
+                                      Background="{StaticResource PrimaryPurple}"
+                                      Foreground="White"
+                                      BorderThickness="0"
+                                      Margin="0,0,10,0"/>
+                                <Button x:Name="ViewButton" 
+                                      Content="View"
+                                      Width="80"
+                                      Height="40"
+                                      Background="{StaticResource DarkSurface}"
+                                      Foreground="{StaticResource TextPrimary}"
+                                      BorderThickness="0"
+                                      Margin="0,0,10,0"/>
+                                <Button x:Name="DeleteButton" 
+                                      Content="Delete"
+                                      Width="80"
+                                      Height="40"
+                                      Background="{StaticResource ErrorRed}"
+                                      Foreground="White"
+                                      BorderThickness="0"/>
+                            </StackPanel>
+                        </Grid>
+                    </Border>
+
+                    <!-- DataGrid -->
+                    <DataGrid x:Name="CustomerGrid" 
+                            Grid.Row="1" 
+                            Background="{StaticResource DarkCard}"
+                            Foreground="{StaticResource DarkCard}"
+                            BorderBrush="{StaticResource DarkSurface}"
+                            BorderThickness="1"
+                            RowBackground="{StaticResource DarkCard}"
+                            AlternatingRowBackground="{StaticResource DarkSurface}"
+                            HeadersVisibility="Column"
+                            AutoGenerateColumns="False"
+                            CanUserAddRows="False"
+                            CanUserDeleteRows="False"
+                            CanUserResizeRows="False"
+                            SelectionMode="Single"
+                            SelectionUnit="FullRow" SelectionChanged="CustomerGrid_SelectionChanged">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="ID" 
+                                              Width="60" 
+                                              Binding="{Binding Id}"
+                                              Foreground="{StaticResource TextSecondary}"/>
+                            <DataGridTextColumn Header="Name" 
+                                              Width="180" 
+                                              Binding="{Binding FullName}"/>
+                            <DataGridTextColumn Header="Phone" 
+                                              Width="120" 
+                                              Binding="{Binding Phone}"/>
+                            <DataGridTextColumn Header="Email" 
+                                              Width="200" 
+                                              Binding="{Binding Email}"/>
+                            <DataGridTextColumn Header="Type" 
+                                              Width="100" 
+                                              Binding="{Binding CustomerType}"/>
+                            <DataGridTextColumn Header="Join Date" 
+                                              Width="110" 
+                                              Binding="{Binding JoinDate, StringFormat=dd-MMM-yyyy}"/>
+                            <DataGridTextColumn Header="Total Spent" 
+                                              Width="110" 
+                                              Binding="{Binding TotalSpent, StringFormat=C}"/>
+                            <DataGridTextColumn Header="Last Purchase" 
+                                              Width="110" 
+                                              Binding="{Binding LastPurchaseDate, StringFormat=dd-MMM}"/>
+                            <DataGridTemplateColumn Header="Status" Width="90">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border CornerRadius="12" Padding="8,4" HorizontalAlignment="Left">
+                                            <Border.Style>
+                                                <Style TargetType="Border">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="True">
+                                                            <Setter Property="Background" Value="#2000E096"/>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                            <Setter Property="Background" Value="#20FF5E7C"/>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Border.Style>
+                                            <TextBlock Text="{Binding StatusText}" 
+                                                     FontSize="11" 
+                                                     FontWeight="Bold"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridTemplateColumn Header="Actions" Width="80">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="📞" 
+                                                  Width="30" 
+                                                  Height="30"
+                                                  Background="Transparent"
+                                                  Foreground="{StaticResource SecondaryBlue}"
+                                                  BorderThickness="0"
+                                                  ToolTip="Call Customer"/>
+                                            <Button Content="✉️" 
+                                                  Width="30" 
+                                                  Height="30"
+                                                  Background="Transparent"
+                                                  Foreground="{StaticResource PrimaryPurple}"
+                                                  BorderThickness="0"
+                                                  Margin="5,0,0,0"
+                                                  ToolTip="Send Email"/>
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </Border>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="{StaticResource DarkSurface}" 
+                CornerRadius="10" 
+                Margin="0,10,0,0"
+                Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="Last Updated: " 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                    <TextBlock x:Name="LastUpdatedText" 
+                             Text="Loading..." 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextPrimary}"
+                             FontWeight="Bold"
+                             Margin="5,0,0,0"/>
+                    <TextBlock Text="•" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextSecondary}"
+                             Margin="15,0"/>
+                    <TextBlock Text="Selected Customer: " 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                    <TextBlock x:Name="SelectedCustomerText" 
+                             Text="None" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextPrimary}"
+                             FontWeight="Bold"
+                             Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button x:Name="SMSButton" 
+                          Content="📱 Send SMS"
+                          Width="100"
+                          Height="40"
+                          Background="{StaticResource DarkSurface}"
+                          Foreground="{StaticResource TextPrimary}"
+                          BorderThickness="0"/>
+                    <Button x:Name="InvoiceButton" 
+                          Content="🧾 Create Invoice"
+                          Width="120"
+                          Height="40"
+                          Background="{StaticResource DarkSurface}"
+                          Foreground="{StaticResource TextPrimary}"
+                          BorderThickness="0"
+                          Margin="10,0,0,0"/>
+                    <Button x:Name="QuickSaleButton" 
+                          Content="💰 Quick Sale"
+                          Width="120"
+                          Height="40"
+                          Background="{StaticResource PrimaryPurple}"
+                          Foreground="White"
+                          BorderThickness="0"
+                          Margin="10,0,0,0"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
