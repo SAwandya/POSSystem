@@ -6,7 +6,7 @@
         xmlns:sys="clr-namespace:System;assembly=mscorlib"
         mc:Ignorable="d"
         Title="Goods Received Note (GRN)"
-        Height="1240"
+        Height="1140"
         Width="1600"
         MinHeight="700"
         MinWidth="1200"

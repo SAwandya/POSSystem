@@ -1,6 +1,7 @@
 ﻿
 using POSSystem.UI.Views.Customer;
 using POSSystem.UI.Views.GRN;
+using POSSystem.UI.Views.inventory;
 using POSSystem.UI.Views.Reports;
 using POSSystem.UI.Views.Stock;
 using System;
@@ -59,7 +60,24 @@ namespace POSSystem.UI.Views.Dashboard
 
         private void StockButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessage("Stock/Inventory clicked");
+
+            try
+            {
+                var inventory = new Inventory();
+                inventory.Show();
+
+
+
+                // Optional: If you want to close dashboard when opening GRN
+                // this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening GRN: {ex.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+
+
         }
 
         private void CustomersButton_Click(object sender, RoutedEventArgs e)
