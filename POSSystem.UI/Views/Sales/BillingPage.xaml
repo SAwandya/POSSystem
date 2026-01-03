@@ -1,0 +1,809 @@
+﻿<Window x:Class="POSSystem.UI.Views.Sales.BillingPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="POS Billing System"
+        Height="900"
+        Width="1600"
+        MinHeight="700"
+        MinWidth="1200"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF0F0F1A"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResize"
+        Loaded="Window_Loaded">
+
+    <Window.Resources>
+        <!-- Color Resources -->
+        <SolidColorBrush x:Key="PrimaryPurple" Color="#FF8B5DFF"/>
+        <SolidColorBrush x:Key="SecondaryBlue" Color="#FF3D8BFF"/>
+        <SolidColorBrush x:Key="SuccessGreen" Color="#FF00E096"/>
+        <SolidColorBrush x:Key="WarningYellow" Color="#FFFFD166"/>
+        <SolidColorBrush x:Key="ErrorRed" Color="#FFFF5E7C"/>
+        <SolidColorBrush x:Key="DarkBackground" Color="#FF0F0F1A"/>
+        <SolidColorBrush x:Key="DarkCard" Color="#FF1A1A2E"/>
+        <SolidColorBrush x:Key="DarkSurface" Color="#FF252540"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0D0"/>
+        
+        <!-- Button Styles -->
+        <Style x:Key="PrimaryButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryPurple}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="10">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Opacity" Value="0.9"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <ScaleTransform ScaleX="0.98" ScaleY="0.98"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Numeric Keypad Button -->
+        <Style x:Key="NumericButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DarkSurface}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Height" Value="60"/>
+            <Setter Property="Width" Value="60"/>
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Action Button -->
+        <Style x:Key="ActionButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource DarkCard}"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                CornerRadius="8">
+                            <ContentPresenter HorizontalAlignment="Center"
+                                            VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter Property="Foreground" Value="White"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Grid Margin="15">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Border Grid.Row="0" 
+                Background="{StaticResource DarkCard}" 
+                CornerRadius="12" 
+                Padding="20" 
+                Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Width="45" Height="45" CornerRadius="10" 
+                            Background="{StaticResource PrimaryPurple}" 
+                            Margin="0,0,15,0">
+                        <TextBlock Text="🧾" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel>
+                        <TextBlock Text="POS BILLING SYSTEM" 
+                                 FontSize="22" 
+                                 FontWeight="Bold" 
+                                 Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Fast checkout and invoice generation" 
+                                 FontSize="12" 
+                                 Foreground="{StaticResource TextSecondary}"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Current Bill Info -->
+                <StackPanel Grid.Column="1" 
+                            Orientation="Horizontal" 
+                            HorizontalAlignment="Center" 
+                            VerticalAlignment="Center">
+                    <Border CornerRadius="10" Margin="0,0,15,0" Padding="15,10"
+                            Background="{StaticResource DarkSurface}">
+                        <StackPanel>
+                            <TextBlock Text="Bill No" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock x:Name="txtBillNo" 
+                                     Text="BILL-00123" 
+                                     FontSize="16" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="10" Margin="0,0,15,0" Padding="15,10"
+                            Background="{StaticResource DarkSurface}">
+                        <StackPanel>
+                            <TextBlock Text="Customer" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock x:Name="txtCustomerName" 
+                                     Text="Walk-in Customer" 
+                                     FontSize="16" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="10" Margin="0,0,15,0" Padding="15,10"
+                            Background="{StaticResource DarkSurface}">
+                        <StackPanel>
+                            <TextBlock Text="Items" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock x:Name="txtItemCount" 
+                                     Text="0" 
+                                     FontSize="16" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource TextPrimary}"/>
+                        </StackPanel>
+                    </Border>
+                    <Border CornerRadius="10" Padding="15,10"
+                            Background="{StaticResource DarkSurface}">
+                        <StackPanel>
+                            <TextBlock Text="Total" 
+                                     FontSize="11" 
+                                     Foreground="{StaticResource TextSecondary}"/>
+                            <TextBlock x:Name="txtTotalAmount" 
+                                     Text="Rs 0.00" 
+                                     FontSize="16" 
+                                     FontWeight="Bold" 
+                                     Foreground="{StaticResource SuccessGreen}"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+
+                <!-- Actions -->
+                <StackPanel Grid.Column="2" 
+                            Orientation="Horizontal" 
+                            VerticalAlignment="Center">
+                    <Button x:Name="btnHoldBill" 
+                          Content="⏸️ Hold Bill"
+                          Style="{StaticResource ActionButton}"
+                          Width="100"
+                          Height="40"
+                          Margin="0,0,10,0"
+                          Click="btnHoldBill_Click"/>
+                    <Button x:Name="btnNewBill" 
+                          Content="🆕 New Bill"
+                          Style="{StaticResource PrimaryButton}"
+                          Width="100"
+                          Height="40"
+                          Click="btnNewBill_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="400"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel - Product Selection -->
+            <Grid Grid.Column="0" Margin="0,0,15,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Product Search & Filters -->
+                <Border Grid.Row="0" 
+                        Background="{StaticResource DarkSurface}" 
+                        CornerRadius="10" 
+                        Padding="15" 
+                        Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Search Box -->
+                        <TextBox x:Name="txtSearch" 
+                               Grid.Column="0"
+                               Background="#20FFFFFF"
+                               Foreground="{StaticResource TextPrimary}"
+                               Height="60"
+                               Padding="15"
+                               FontSize="18"
+                               VerticalContentAlignment="Center">
+                            <TextBox.InputBindings>
+                                <KeyBinding Key="Enter" Command="{Binding SearchCommand}"/>
+                                <KeyBinding Key="F3" Command="{Binding SearchCommand}"/>
+                            </TextBox.InputBindings>
+                        </TextBox>
+
+                        <!-- Barcode Button -->
+                        <Button x:Name="btnBarcode" 
+                              Grid.Column="1"
+                              Content="📷 Scan Barcode"
+                              Style="{StaticResource ActionButton}"
+                              Width="140"
+                              Height="40"
+                              Margin="15,0"
+                              Click="btnBarcode_Click"/>
+
+                        <!-- Categories -->
+                        <ComboBox x:Name="cmbCategory" 
+                                Grid.Column="2"
+                                Background="{StaticResource DarkCard}"
+                                Foreground="{StaticResource DarkBackground}"
+                                Height="40"
+                                Width="150"
+                                Padding="10"
+                                FontSize="13">
+                            <ComboBoxItem Content="All Categories" IsSelected="True"/>
+                            <ComboBoxItem Content="Electronics"/>
+                            <ComboBoxItem Content="Groceries"/>
+                            <ComboBoxItem Content="Clothing"/>
+                            <ComboBoxItem Content="Stationery"/>
+                            <ComboBoxItem Content="Beverages"/>
+                        </ComboBox>
+                    </Grid>
+                </Border>
+
+                <!-- Product Grid -->
+                <Border Grid.Row="1" 
+                        Background="{StaticResource DarkCard}" 
+                        CornerRadius="10" 
+                        Padding="15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Products List -->
+                        <ScrollViewer Grid.Row="0" VerticalScrollBarVisibility="Auto">
+                            <ItemsControl x:Name="ProductsList">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel Margin="5"/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Width="180" 
+                                                Height="120" 
+                                                Background="{StaticResource DarkSurface}" 
+                                                CornerRadius="8" 
+                                                Margin="5"
+                                                Cursor="Hand"
+                                                MouseLeftButtonDown="ProductItem_MouseLeftButtonDown">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="*"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                    <RowDefinition Height="Auto"/>
+                                                </Grid.RowDefinitions>
+
+                                                <!-- Product Info -->
+                                                <StackPanel Grid.Row="0" Margin="10">
+                                                    <TextBlock Text="{Binding Name}" 
+                                                             FontSize="14" 
+                                                             FontWeight="Bold" 
+                                                             Foreground="{StaticResource TextPrimary}"
+                                                             TextTrimming="CharacterEllipsis"/>
+                                                    <TextBlock Text="{Binding Category}" 
+                                                             FontSize="11" 
+                                                             Foreground="{StaticResource TextSecondary}"
+                                                             Margin="0,2,0,0"/>
+                                                </StackPanel>
+
+                                                <!-- Price & Stock -->
+                                                <Grid Grid.Row="1" Margin="10,0">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*"/>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock Text="{Binding Price, StringFormat=Rs {0:.00}}" 
+                                                             FontSize="13" 
+                                                             FontWeight="Bold" 
+                                                             Foreground="{StaticResource SuccessGreen}"/>
+                                                    <TextBlock Grid.Column="1" 
+                                                             Text="{Binding Stock, StringFormat=Stock: {0}}"
+                                                             FontSize="10" 
+                                                             Foreground="{StaticResource TextSecondary}"/>
+                                                </Grid>
+
+                                                <!-- Add Button -->
+                                                <Button Grid.Row="2"
+                                                        Content="+ Add to Bill"
+                                                        Background="{StaticResource PrimaryPurple}"
+                                                        Foreground="White"
+                                                        Height="30"
+                                                        BorderThickness="0"
+                                                        FontSize="11"
+                                                        FontWeight="Bold"
+                                                        Margin="10"
+                                                        Click="AddProduct_Click"
+                                                        Tag="{Binding Id}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </ScrollViewer>
+
+                        <!-- Pagination -->
+                        <Border Grid.Row="1" 
+                                Background="{StaticResource DarkSurface}" 
+                                CornerRadius="8" 
+                                Padding="10" 
+                                Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                <Button Content="← Previous" 
+                                      Style="{StaticResource ActionButton}"
+                                      Width="100"
+                                      Click="PreviousPage_Click"/>
+                                <TextBlock Text="Page 1 of 5" 
+                                         FontSize="12" 
+                                         Foreground="{StaticResource TextPrimary}"
+                                         VerticalAlignment="Center"
+                                         Margin="15,0"/>
+                                <Button Content="Next →" 
+                                      Style="{StaticResource ActionButton}"
+                                      Width="100"
+                                      Click="NextPage_Click"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Right Panel - Bill Details -->
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Bill Items -->
+                <Border Grid.Row="0" 
+                        Background="{StaticResource DarkCard}" 
+                        CornerRadius="10" 
+                        Margin="0,0,0,15"
+                        Padding="15">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Bill Header -->
+                        <Border Grid.Row="0" 
+                                Background="{StaticResource DarkSurface}" 
+                                CornerRadius="8" 
+                                Padding="10" 
+                                Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="BILL ITEMS" 
+                                         FontSize="14" 
+                                         FontWeight="Bold" 
+                                         Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Grid.Column="2" 
+                                         x:Name="txtBillItemsCount"
+                                         Text="0 Items"
+                                         FontSize="12" 
+                                         Foreground="{StaticResource TextSecondary}"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Bill Items List -->
+                        <DataGrid x:Name="dgBillItems"
+                                Grid.Row="1"
+                                Background="Transparent"
+                                Foreground="Black"
+                                BorderThickness="0"
+                                RowBackground="White"
+                              
+                                HeadersVisibility="Column"
+                                AutoGenerateColumns="False"
+                                CanUserAddRows="False"
+                                CanUserDeleteRows="False"
+                                CanUserResizeRows="False"
+                                SelectionMode="Single"
+                                SelectionUnit="FullRow"
+                                FontSize="12"
+                                Margin="0,0,0,10">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="#" Width="30" Binding="{Binding SNo}"/>
+                                <DataGridTextColumn Header="Item" Width="150" Binding="{Binding Name}"/>
+                                <DataGridTextColumn Header="Qty" Width="60" Binding="{Binding Quantity}">
+                                    <DataGridTextColumn.CellStyle>
+                                        <Style TargetType="DataGridCell">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.CellStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Price" Width="80" Binding="{Binding Price, StringFormat={}{0:0.00}}"/>
+                                <DataGridTextColumn Header="Total" Width="80" Binding="{Binding Total, StringFormat={}{0:0.00}}"/>
+                                <DataGridTemplateColumn Header="Action" Width="60">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Content="✕" 
+                                                  Width="25" 
+                                                  Height="25"
+                                                  Background="Transparent"
+                                                  Foreground="{StaticResource ErrorRed}"
+                                                  BorderThickness="0"
+                                                  FontSize="12"
+                                                  FontWeight="Bold"
+                                                  Click="RemoveItem_Click"
+                                                  Tag="{Binding Id}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <!-- Item Actions -->
+                        <Border Grid.Row="2" 
+                                Background="{StaticResource DarkSurface}" 
+                                CornerRadius="8" 
+                                Padding="10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <Button x:Name="btnEditItem" 
+                                      Content="✏️ Edit"
+                                      Style="{StaticResource ActionButton}"
+                                      Margin="0,0,5,0"
+                                      Click="btnEditItem_Click"/>
+                                <Button x:Name="btnRemoveItem" 
+                                      Content="🗑️ Remove"
+                                      Style="{StaticResource ActionButton}"
+                                      Grid.Column="1"
+                                      Margin="5,0"
+                                      Click="btnRemoveItem_Click"/>
+                                <Button x:Name="btnClearAll" 
+                                      Content="🗑️ Clear All"
+                                      Style="{StaticResource ActionButton}"
+                                      Grid.Column="2"
+                                      Margin="5,0,0,0"
+                                      Click="btnClearAll_Click"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                </Border>
+
+                <!-- Payment Panel -->
+                <Border Grid.Row="1" 
+                        Background="{StaticResource DarkSurface}" 
+                        CornerRadius="10" 
+                        Padding="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Bill Summary -->
+                        <StackPanel Grid.Row="0" Margin="0,0,0,15">
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Sub Total" 
+                                         FontSize="13" 
+                                         Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtSubTotal" 
+                                         Grid.Column="1"
+                                         Text="Rs 0.00" 
+                                         FontSize="13" 
+                                         FontWeight="Bold"
+                                         Foreground="{StaticResource TextPrimary}"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Discount" 
+                                         FontSize="13" 
+                                         Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtDiscount" 
+                                         Grid.Column="1"
+                                         Text="Rs 0.00" 
+                                         FontSize="13" 
+                                         FontWeight="Bold"
+                                         Foreground="{StaticResource WarningYellow}"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,10">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Tax (18%)" 
+                                         FontSize="13" 
+                                         Foreground="{StaticResource TextSecondary}"/>
+                                <TextBlock x:Name="txtTax" 
+                                         Grid.Column="1"
+                                         Text="Rs 0.00" 
+                                         FontSize="13" 
+                                         FontWeight="Bold"
+                                         Foreground="{StaticResource TextPrimary}"/>
+                            </Grid>
+                            <Grid Margin="0,0,0,15">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="Grand Total" 
+                                         FontSize="15" 
+                                         FontWeight="Bold"
+                                         Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock x:Name="txtGrandTotal" 
+                                         Grid.Column="1"
+                                         Text="Rs 0.00" 
+                                         FontSize="18" 
+                                         FontWeight="Bold"
+                                         Foreground="{StaticResource SuccessGreen}"/>
+                            </Grid>
+                        </StackPanel>
+
+                        <!-- Discount Input -->
+                        <Border Grid.Row="1" 
+                                Background="{StaticResource DarkCard}" 
+                                CornerRadius="8" 
+                                Padding="10" 
+                                Margin="0,0,0,10">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtDiscountInput" 
+                                       Text="0"
+                                       Background="Transparent"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       Height="35"
+                                       Padding="10"
+                                       VerticalContentAlignment="Center"/>
+                                <ComboBox x:Name="cmbDiscountType" 
+                                        Grid.Column="1"
+                                        Width="80"
+                                        Height="35"
+                                        Margin="10,0,0,0">
+                                    <ComboBoxItem Content="Rs" IsSelected="True"/>
+                                    <ComboBoxItem Content="%"/>
+                                </ComboBox>
+                            </Grid>
+                        </Border>
+
+                        <!-- Payment Methods -->
+                        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+                            <TextBlock Text="Payment Method" 
+                                     FontSize="13" 
+                                     Foreground="{StaticResource TextSecondary}"
+                                     Margin="0,0,0,8"/>
+                            <WrapPanel>
+                                <RadioButton x:Name="rbCash" 
+                                           Content="💵 Cash" 
+                                           GroupName="Payment"
+                                           IsChecked="True"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           Margin="0,0,10,5"/>
+                                <RadioButton x:Name="rbCard" 
+                                           Content="💳 Card" 
+                                           GroupName="Payment"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           Margin="0,0,10,5"/>
+                                <RadioButton x:Name="rbUPI" 
+                                           Content="📱 UPI" 
+                                           GroupName="Payment"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           Margin="0,0,10,5"/>
+                                <RadioButton x:Name="rbCredit" 
+                                           Content="📝 Credit" 
+                                           GroupName="Payment"
+                                           Foreground="{StaticResource TextPrimary}"
+                                           Margin="0,0,10,5"/>
+                            </WrapPanel>
+                        </StackPanel>
+
+                        <!-- Amount Paid -->
+                        <Border Grid.Row="3" 
+                                Background="{StaticResource DarkCard}" 
+                                CornerRadius="8" 
+                                Padding="10" 
+                                Margin="0,0,0,15">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBox x:Name="txtAmountPaid" 
+                                       Text="0.00"
+                                       Background="Transparent"
+                                       Foreground="{StaticResource TextPrimary}"
+                                       Height="40"
+                                       Padding="10"
+                                       FontSize="14"
+                                       VerticalContentAlignment="Center"/>
+                                <Button x:Name="btnCalculate" 
+                                      Content="="
+                                      Grid.Column="1"
+                                      Style="{StaticResource ActionButton}"
+                                      Width="40"
+                                      Height="40"
+                                      Margin="10,0,0,0"
+                                      Click="btnCalculate_Click"/>
+                            </Grid>
+                        </Border>
+
+                        <!-- Action Buttons -->
+                        <Grid Grid.Row="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button x:Name="btnPrintBill" 
+                                  Content="🖨️ Print Bill"
+                                  Style="{StaticResource ActionButton}"
+                                  Height="45"
+                                  Margin="0,0,5,0"
+                                  Click="btnPrintBill_Click"/>
+                            <Button x:Name="btnProcessPayment" 
+                                  Content="💰 Process Payment"
+                                  Style="{StaticResource PrimaryButton}"
+                                  Grid.Column="1"
+                                  Height="45"
+                                  Margin="5,0,0,0"
+                                  Background="{StaticResource SuccessGreen}"
+                                  Click="btnProcessPayment_Click" VerticalAlignment="Top"/>
+                        </Grid>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <!-- Footer -->
+        <Border Grid.Row="2" 
+                Background="{StaticResource DarkCard}" 
+                CornerRadius="10" 
+                Margin="0,15,0,0"
+                Padding="15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Quick Actions -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="btnHoldList" 
+                          Content="📋 Hold Bills"
+                          Style="{StaticResource ActionButton}"
+                          Width="100"
+                          Height="35"
+                          Margin="0,0,10,0"
+                          Click="btnHoldList_Click"/>
+                    <Button x:Name="btnInvoiceHistory" 
+                          Content="📄 Invoice History"
+                          Style="{StaticResource ActionButton}"
+                          Width="120"
+                          Height="35"
+                          Margin="0,0,10,0"
+                          Click="btnInvoiceHistory_Click"/>
+                    <Button x:Name="btnCustomerMgmt" 
+                          Content="👥 Customer"
+                          Style="{StaticResource ActionButton}"
+                          Width="100"
+                          Height="35"
+                          Margin="0,0,10,0"
+                          Click="btnCustomerMgmt_Click"/>
+                </StackPanel>
+
+                <!-- Cash Drawer Status -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,20,0">
+                    <Border Width="8" Height="8" CornerRadius="4" 
+                            Background="{StaticResource SuccessGreen}" 
+                            Margin="0,0,5,0"/>
+                    <TextBlock Text="Cash Drawer: Open" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextPrimary}"/>
+                    <TextBlock Text=" | Balance: Rs 25,000.00" 
+                             FontSize="12" 
+                             Foreground="{StaticResource SuccessGreen}"
+                             Margin="5,0,0,0"/>
+                </StackPanel>
+
+                <!-- Current User & Time -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock Text="👤 Admin" 
+                             FontSize="12" 
+                             Foreground="{StaticResource TextPrimary}"
+                             Margin="0,0,15,0"/>
+                    <TextBlock x:Name="txtCurrentTime" 
+                             Text="10:30 AM"
+                             FontSize="12" 
+                             Foreground="{StaticResource TextSecondary}"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

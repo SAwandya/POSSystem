@@ -187,5 +187,10 @@ namespace POSSystem.UI.Views.Dashboard
         {
             Console.WriteLine($"[Dashboard] {message}");
         }
+
+        private void Window_SizeChanged(object sender, SizeChangedEventArgs e)
+        {
+
+        }
     }
 }

@@ -1,4 +1,5 @@
 ﻿using POSSystem.UI.Views.Dashboard;
+using POSSystem.UI.Views.Sales;
 using System;
 using System.Windows;
 using System.Windows.Input;
@@ -43,9 +44,26 @@ namespace POSSystem.UI
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-            Dashboard dashboard = new Dashboard();
-            dashboard.Show();
-            this.Close();
+
+            var username = UsernameBox.Text;
+            var password = PasswordBox.Password;
+
+            if(username == "bill" && password == "123")
+            {
+
+                BillingPage billpage = new BillingPage();
+                billpage.Show();
+                this.Close();
+
+            }
+            else
+            {
+                Dashboard dashboard = new Dashboard();
+                dashboard.Show();
+                this.Close();
+            }
+
+           
 
            
         }

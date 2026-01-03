@@ -28,16 +28,19 @@
             <GradientStop Color="#FF3D8BFF" Offset="1"/>
         </LinearGradientBrush>
 
-        <!-- TextBox Style -->
+        <!-- SIMPLE AND WORKING TextBox Style -->
         <Style x:Key="ModernTextBox" TargetType="TextBox">
             <Setter Property="Background" Value="#20FFFFFF"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#40FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Height" Value="45"/>
             <Setter Property="Padding" Value="15"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="CaretBrush" Value="White"/>
+         
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="TextBox">
@@ -45,11 +48,17 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12">
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
                             <Grid>
+                                <!-- Use the built-in ScrollViewer properly -->
                                 <ScrollViewer x:Name="PART_ContentHost"
-                                            VerticalAlignment="Center"
-                                            Margin="{TemplateBinding Padding}"/>
+                                              Focusable="false"
+                                              HorizontalScrollBarVisibility="Hidden"
+                                              VerticalScrollBarVisibility="Hidden"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              Padding="{TemplateBinding Padding}"/>
                             </Grid>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -66,16 +75,17 @@
             </Setter>
         </Style>
 
-        <!-- PasswordBox Style -->
+        <!-- SIMPLE AND WORKING PasswordBox Style -->
         <Style x:Key="ModernPasswordBox" TargetType="PasswordBox">
             <Setter Property="Background" Value="#20FFFFFF"/>
-            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="Foreground" Value="White"/>
             <Setter Property="BorderBrush" Value="#40FFFFFF"/>
             <Setter Property="BorderThickness" Value="1"/>
             <Setter Property="Height" Value="45"/>
             <Setter Property="Padding" Value="15"/>
             <Setter Property="FontSize" Value="14"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="CaretBrush" Value="White"/>
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="PasswordBox">
@@ -83,12 +93,17 @@
                                 Background="{TemplateBinding Background}"
                                 BorderBrush="{TemplateBinding BorderBrush}"
                                 BorderThickness="{TemplateBinding BorderThickness}"
-                                CornerRadius="12">
-                            <Grid>
+                                CornerRadius="12"
+                                SnapsToDevicePixels="True">
+                            <!-- PasswordBox needs AdornerDecorator -->
+                            <AdornerDecorator>
                                 <ScrollViewer x:Name="PART_ContentHost"
-                                            VerticalAlignment="Center"
-                                            Margin="{TemplateBinding Padding}"/>
-                            </Grid>
+                                              Focusable="false"
+                                              HorizontalScrollBarVisibility="Hidden"
+                                              VerticalScrollBarVisibility="Hidden"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              Padding="{TemplateBinding Padding}"/>
+                            </AdornerDecorator>
                         </Border>
                         <ControlTemplate.Triggers>
                             <Trigger Property="IsMouseOver" Value="True">
@@ -193,8 +208,6 @@
             <!-- Left Side - Branding -->
             <Grid Grid.Column="0">
                 <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Width="450">
-                    <!-- Logo -->
-
                     <!-- Brand Text -->
                     <StackPanel>
                         <TextBlock Text="POS PRO" 
@@ -300,30 +313,45 @@
                                      FontSize="12" 
                                      Foreground="{StaticResource TextSecondary}"
                                      Margin="0,0,0,8"/>
+
+                            <!-- FIXED TextBox -->
                             <TextBox x:Name="UsernameBox" 
                                    Style="{StaticResource ModernTextBox}"
-                                   Height="45"/>
+                                   Height="55"
+                                   Width="320"
+                                   HorizontalAlignment="Left"
+                                   Margin="0,0,0,10"
+                                   Text=""/>
+                            <!-- Added test text to verify visibility -->
 
                             <!-- Password -->
                             <TextBlock Text="Password" 
                                      FontSize="12" 
                                      Foreground="{StaticResource TextSecondary}"
                                      Margin="0,20,0,8"/>
+
+                            <!-- FIXED PasswordBox -->
                             <PasswordBox x:Name="PasswordBox" 
                                        Style="{StaticResource ModernPasswordBox}"
-                                       Height="45"/>
+                                       Height="55"
+                                       Width="320"
+                                       HorizontalAlignment="Left"
+                                       Margin="0,0,0,0"/>
 
                             <!-- Remember Me -->
                             <CheckBox x:Name="RememberMeCheckBox" 
                                     Content="Remember me"
                                     Foreground="{StaticResource TextSecondary}"
                                     FontSize="13"
-                                    Margin="0,20,0,25"/>
+                                    Margin="0,20,0,25"
+                                    HorizontalAlignment="Left"/>
 
                             <!-- Login Button -->
                             <Button x:Name="LoginButton" 
                                   Style="{StaticResource PrimaryButton}"
                                   Height="50"
+                                  Width="320"
+                                  HorizontalAlignment="Left"
                                   Margin="0,0,0,20"
                                   Click="LoginButton_Click">
                                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -345,6 +373,7 @@
                                   BorderThickness="0"
                                   Height="30"
                                   FontSize="13"
+                                  HorizontalAlignment="Left"
                                   Click="ForgotPasswordButton_Click"/>
                         </StackPanel>
 

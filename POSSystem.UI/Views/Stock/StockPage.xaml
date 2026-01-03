@@ -291,11 +291,11 @@
 
                         <TextBlock Text="Category" 
                                  FontSize="12" 
-                                 Foreground="{StaticResource TextSecondary}"
+                                 Foreground="{StaticResource DarkBackground}"
                                  Margin="0,0,0,5"/>
                         <ComboBox x:Name="CategoryFilter" 
                                 Background="#20FFFFFF"
-                                Foreground="{StaticResource TextPrimary}"
+                                Foreground="{StaticResource DarkBackground}"
                                 Height="35"
                                 Padding="10"
                                 Margin="0,0,0,15">
@@ -416,7 +416,7 @@
                     <DataGrid x:Name="StockGrid" 
                             Grid.Row="1" 
                             Background="{StaticResource DarkCard}"
-                            Foreground="{StaticResource TextPrimary}"
+                            Foreground="{StaticResource DarkSurface}"
                             BorderBrush="{StaticResource DarkSurface}"
                             BorderThickness="1"
                             RowBackground="{StaticResource DarkCard}"

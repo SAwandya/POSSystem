@@ -376,7 +376,7 @@
                                 <StackPanel Orientation="Horizontal" Margin="0,0,0,5">
                                     <TextBlock Text="Supplier" 
                                              FontSize="12" 
-                                             Foreground="{StaticResource TextSecondary}"/>
+                                             Foreground="{StaticResource DarkBackground}"/>
                                     <TextBlock Text=" *" 
                                              FontSize="12" 
                                              Foreground="{StaticResource ErrorRed}"/>
@@ -418,7 +418,7 @@
 
                             <!-- Dates -->
                             <Grid Margin="0,0,0,15">
-                                <Grid.ColumnDefinitions>
+                                <Grid.ColumnDefinitions >
                                     <ColumnDefinition Width="*"/>
                                     <ColumnDefinition Width="10"/>
                                     <ColumnDefinition Width="*"/>
