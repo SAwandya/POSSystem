@@ -7,4 +7,15 @@
     <ImplicitUsings>enable</ImplicitUsings>
   </PropertyGroup>
 
+  <ItemGroup>
+    <PackageReference Include="AutoMapper" Version="13.0.1" />
+    <PackageReference Include="FluentValidation" Version="11.11.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\POSSystem.Domain\POSSystem.Domain.csproj" />
+    <ProjectReference Include="..\POSSystem.Common\POSSystem.Common.csproj" />
+  </ItemGroup>
+
 </Project>
