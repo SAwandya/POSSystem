@@ -1,126 +1,186 @@
-# POSSystem – Run Guide
+# POS System Pro - Setup Guide
 
-This document explains how to **build and run the POSSystem WPF application** locally using Visual Studio.
+## 🚀 Quick Start Guide
 
----
+### Prerequisites
+1. **MySQL Server 8.0+** installed and running
+2. **.NET 9 SDK** installed
+3. **Visual Studio 2022** or VS Code
 
-## Prerequisites
+### Database Setup
 
-Make sure the following are installed on your machine:
+#### Step 1: Create Database
+Open MySQL Workbench or command line and run:
 
-* **Windows 10 / 11**
-* **Visual Studio 2022** (latest version)
-* Visual Studio workloads:
-
-  * ✅ **.NET desktop development**
-  * ⬜ Data storage and processing (recommended for SQL Server)
-* **.NET 8 SDK**
-* **SQL Server Express / Developer** (optional – required for database features)
-
----
-
-## Solution Structure
-
-```
-POSSystem.sln
-│
-├── POSSystem.UI              # WPF desktop application (Startup project)
-├── POSSystem.Application     # Business logic & services
-├── POSSystem.Domain          # Core domain entities
-├── POSSystem.Infrastructure  # Database & external integrations
-├── POSSystem.Common          # Shared utilities
-└── README.md
+```sql
+CREATE DATABASE IF NOT EXISTS pos_system_pro;
+USE pos_system_pro;
 ```
 
----
+#### Step 2: Run the SQL Script
+Execute the complete SQL script provided (`database_schema.sql`) to create all tables.
 
-## How to Open the Project
+#### Step 3: Configure Connection String
+Open `POSSystem.UI\appsettings.json` and update the connection string:
 
-1. Open **File Explorer**
-2. Navigate to the project root folder
-3. Double-click **`POSSystem.sln`**
-
-⚠️ Do **not** open the folder directly in Visual Studio (avoid *Open Folder* mode).
-
----
-
-## How to Run the Application
-
-1. In **Solution Explorer**, right-click:
-
-   * `POSSystem.UI`
-2. Select **Set as Startup Project**
-3. From the top menu, select:
-
-   * **Build → Rebuild Solution**
-4. Press **F5** or click **Start** ▶
-
-If the build succeeds, the **WPF application window will launch**.
-
----
-
-## Common Build Checks
-
-Before running, ensure:
-
-* `POSSystem.UI` target framework is:
-
-  ```
-  net8.0-windows
-  ```
-* `POSSystem.UI.csproj` contains:
-
-  ```xml
-  <UseWPF>true</UseWPF>
-  <OutputType>WinExe</OutputType>
-  ```
-* `POSSystem.UI` is marked as the **startup project**
-
----
-
-## Build Output Location
-
-After a successful build, the executable will be generated at:
-
-```
-POSSystem.UI\bin\Debug\net8.0-windows\POSSystem.UI.exe
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=pos_system_pro;User=root;Password=YOUR_MYSQL_PASSWORD;Port=3306;CharSet=utf8mb4;"
+  }
+}
 ```
 
----
+**Important:** Replace `YOUR_MYSQL_PASSWORD` with your actual MySQL root password.
 
-## Troubleshooting
+### Running the Application
 
-### Issue: `.exe` not found
+1. **Build the Solution**
+   ```bash
+   dotnet build
+   ```
 
-* Run **Build → Clean Solution**
-* Then **Build → Rebuild Solution**
-* Check the **Output** window for errors
+2. **Run the Application**
+   ```bash
+   dotnet run --project POSSystem.UI\POSSystem.UI.csproj
+   ```
 
-### Issue: Application namespace conflict
+   Or press **F5** in Visual Studio
 
-Ensure `App.xaml.cs` inherits explicitly from:
+3. **Login Credentials**
+   - **Admin/Manager:** username: `admin`, password: `admin`
+   - **Billing User:** username: `bill`, password: `123`
 
-```csharp
-System.Windows.Application
+### Features Implemented
+
+#### ✅ Inventory Management
+- View all products with stock levels
+- Add/Edit/Delete products
+- Low stock alerts
+- Product search by name or barcode
+- Category-based filtering
+
+#### ✅ Sales & Billing
+- Complete POS billing interface
+- Real-time inventory updates
+- Multiple payment methods (Cash, Card, UPI, Credit)
+- Tax calculation (18% GST)
+- Discount management
+- Two bill formats:
+  - Relaword Format (80mm thermal printer)
+  - Standard A4 format
+- Invoice generation
+- Change calculation
+
+#### ✅ Database Integration
+- Entity Framework Core 9.0
+- MySQL/MariaDB support
+- Repository pattern
+- Unit of Work pattern
+- Transaction management
+- Automatic database creation
+- Sample data seeding
+
+### Project Structure
+
+```
+POSSystem/
+├── POSSystem.Domain/           # Domain entities
+│   └── Entities/               # All database entities
+├── POSSystem.Infrastructure/   # Data access layer
+│   ├── Data/                   # DbContext & migrations
+│   └── Repositories/           # Repository implementations
+├── POSSystem.Application/      # Business logic layer
+│   ├── DTOs/                   # Data Transfer Objects
+│   └── Services/               # Service implementations
+└── POSSystem.UI/               # WPF User Interface
+    ├── Views/                  # All XAML views
+    │   ├── Dashboard/
+    │   ├── Sales/
+    │   ├── Inventory/
+    │   └── ...
+    └── appsettings.json        # Configuration
 ```
 
+### Testing the System
+
+1. **Test Product Management:**
+   - Navigate to Dashboard
+   - Click "Inventory" button
+   - Products are loaded from database
+   - Try adding/editing products
+
+2. **Test Sales:**
+   - Login with `bill / 123`
+   - BillingPage opens
+   - Products are loaded from database
+   - Add items to cart
+   - Process payment
+   - Verify inventory is updated
+   - Sale is saved to database
+
+3. **Verify Database:**
+   ```sql
+   -- Check products
+   SELECT * FROM products;
+   
+   -- Check inventory
+   SELECT p.name, i.quantity, i.selling_price 
+   FROM products p 
+   JOIN inventory i ON p.product_id = i.product_id;
+   
+   -- Check sales
+   SELECT * FROM sales;
+   SELECT * FROM sales_items;
+   ```
+
+### Common Issues & Solutions
+
+#### Issue: "Database connection failed"
+**Solution:** 
+- Ensure MySQL server is running
+- Check connection string in appsettings.json
+- Verify username/password
+- Ensure database `pos_system_pro` exists
+
+#### Issue: "Could not find appsettings.json"
+**Solution:**
+- Build the project (appsettings.json is copied to output directory)
+- Or manually copy appsettings.json to bin/Debug/net9.0-windows/
+
+#### Issue: "Table doesn't exist"
+**Solution:**
+- Run the complete SQL script again
+- Or let the application create tables (EnsureCreated)
+
+### Next Steps (Future Enhancements)
+
+- [ ] User authentication with password hashing
+- [ ] GRN (Goods Receipt Note) integration
+- [ ] Reports & Analytics
+- [ ] Customer management
+- [ ] Stock adjustments
+- [ ] Purchase returns & sales returns
+- [ ] Drawer management
+- [ ] Permissions & role-based access
+
+### Tech Stack
+
+- **Framework:** .NET 9
+- **UI:** WPF with Material Design
+- **Database:** MySQL 8.0+ / MariaDB
+- **ORM:** Entity Framework Core 9.0
+- **Architecture:** Clean Architecture (Domain, Application, Infrastructure, UI)
+- **Patterns:** Repository, Unit of Work, Dependency Injection
+
+### Support
+
+For issues or questions:
+1. Check the error logs in the application
+2. Verify database connection
+3. Check that all NuGet packages are restored
+4. Ensure .NET 9 SDK is installed
+
 ---
 
-## Notes
-
-* This project follows **clean / layered architecture**
-* UI layer depends on Application & Infrastructure layers
-* Domain layer has **no external dependencies**
-
----
-
-## Next Steps
-
-* Configure Dependency Injection
-* Setup SQL Server & Entity Framework
-* Create Login & Sales screens
-* Integrate POS hardware (printer, barcode scanner)
-
----
-
-Happy coding 🚀
+**Built with ❤️ for efficient retail management**

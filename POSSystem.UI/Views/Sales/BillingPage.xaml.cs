@@ -1,4 +1,6 @@
-﻿using System;
+﻿using POSSystem.Application.DTOs;
+using POSSystem.Application.Services;
+using System;
 using System.Collections.ObjectModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,8 +15,11 @@ namespace POSSystem.UI.Views.Sales
 {
     public partial class BillingPage : Window
     {
+        private readonly IProductService _productService;
+        private readonly ISalesService _salesService;
+
         // For product grid
-        public ObservableCollection<ProductItem> SampleProducts { get; set; }
+        public ObservableCollection<ProductDisplayModel> DisplayProducts { get; set; }
 
         // For bill items
         public ObservableCollection<BillItem> BillItems { get; set; }
@@ -25,43 +30,61 @@ namespace POSSystem.UI.Views.Sales
         public decimal Tax { get; set; }
         public decimal GrandTotal { get; set; }
 
-        public BillingPage()
+        // Current user and session (hardcoded for now, will be from login later)
+        private readonly int _currentUserId = 1; // Admin user
+        private readonly int _currentSessionId = 1; // Default session
+
+        public BillingPage(IProductService productService, ISalesService salesService)
         {
             InitializeComponent();
 
+            _productService = productService;
+            _salesService = salesService;
+
             // Initialize collections
             BillItems = new ObservableCollection<BillItem>();
-            SampleProducts = new ObservableCollection<ProductItem>();
+            DisplayProducts = new ObservableCollection<ProductDisplayModel>();
 
             // Set DataContext
             DataContext = this;
 
-            // Initialize sample data
-            InitializeSampleData();
-
             // Bind DataGrid
             dgBillItems.ItemsSource = BillItems;
+
+            // Load products from database
+            LoadProductsAsync();
 
             // Update UI
             UpdateBillSummary();
         }
 
-        private void InitializeSampleData()
+        private async void LoadProductsAsync()
         {
-            // Add sample products
-            SampleProducts.Add(new ProductItem { Id = "P001", Name = "Apple iPhone 14", Category = "Electronics", Price = 79999.00m, Stock = 15 });
-            SampleProducts.Add(new ProductItem { Id = "P002", Name = "Samsung TV 55 inch", Category = "Electronics", Price = 54999.00m, Stock = 8 });
-            SampleProducts.Add(new ProductItem { Id = "P003", Name = "Milk 1 Liter", Category = "Groceries", Price = 60.00m, Stock = 50 });
-            SampleProducts.Add(new ProductItem { Id = "P004", Name = "Bread", Category = "Groceries", Price = 35.00m, Stock = 30 });
-            SampleProducts.Add(new ProductItem { Id = "P005", Name = "T-Shirt", Category = "Clothing", Price = 499.00m, Stock = 25 });
-            SampleProducts.Add(new ProductItem { Id = "P006", Name = "Jeans", Category = "Clothing", Price = 1299.00m, Stock = 18 });
-            SampleProducts.Add(new ProductItem { Id = "P007", Name = "Notebook", Category = "Stationery", Price = 45.00m, Stock = 100 });
-            SampleProducts.Add(new ProductItem { Id = "P008", Name = "Pen Set", Category = "Stationery", Price = 299.00m, Stock = 40 });
-            SampleProducts.Add(new ProductItem { Id = "P009", Name = "Coca Cola 2L", Category = "Beverages", Price = 90.00m, Stock = 60 });
-            SampleProducts.Add(new ProductItem { Id = "P010", Name = "Coffee Powder", Category = "Beverages", Price = 250.00m, Stock = 35 });
+            try
+            {
+                var products = await _productService.GetActiveProductsAsync();
+                
+                DisplayProducts.Clear();
+                foreach (var product in products)
+                {
+                    DisplayProducts.Add(new ProductDisplayModel
+                    {
+                        Id = product.ProductId.ToString(),
+                        Name = product.Name,
+                        Category = product.Category,
+                        Price = product.SellingPrice,
+                        Stock = (int)product.Quantity
+                    });
+                }
 
-            // Set ProductsList items source
-            ProductsList.ItemsSource = SampleProducts;
+                // Set ProductsList items source
+                ProductsList.ItemsSource = DisplayProducts;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading products: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // ==================== EVENT HANDLERS ====================
@@ -79,7 +102,7 @@ namespace POSSystem.UI.Views.Sales
             if (button != null && button.Tag != null)
             {
                 string productId = button.Tag.ToString();
-                var product = SampleProducts.FirstOrDefault(p => p.Id == productId);
+                var product = DisplayProducts.FirstOrDefault(p => p.Id == productId);
 
                 if (product != null)
                 {
@@ -118,14 +141,14 @@ namespace POSSystem.UI.Views.Sales
         {
             // Alternative way to add product - double click
             var border = sender as Border;
-            if (border != null && border.DataContext is ProductItem product)
+            if (border != null && border.DataContext is ProductDisplayModel product)
             {
                 // Add product to bill
                 AddProductToBill(product);
             }
         }
 
-        private void AddProductToBill(ProductItem product)
+        private void AddProductToBill(ProductDisplayModel product)
         {
             var existingItem = BillItems.FirstOrDefault(i => i.ProductId == product.Id);
 
@@ -411,8 +434,8 @@ namespace POSSystem.UI.Views.Sales
             }
         }
 
-        // ==================== UPDATED PROCESS PAYMENT ====================
-        private void btnProcessPayment_Click(object sender, RoutedEventArgs e)
+        // ==================== UPDATED PROCESS PAYMENT WITH DATABASE ====================
+        private async void btnProcessPayment_Click(object sender, RoutedEventArgs e)
         {
             if (BillItems.Count == 0)
             {
@@ -444,37 +467,89 @@ namespace POSSystem.UI.Views.Sales
                 }
             }
 
-            decimal change = amountPaid - GrandTotal;
-            string paymentMethod = GetSelectedPaymentMethod();
-
-            // Create invoice
-            Invoice invoice = CreateInvoiceFromCurrentBill(amountPaid, change, paymentMethod);
-
-            // Show payment summary and auto-print
-            string message = $"✅ PAYMENT SUCCESSFUL!\n\n" +
-                           $"Invoice: {invoice.InvoiceNumber}\n" +
-                           $"Total: ₹ {GrandTotal:#,##0.00}\n" +
-                           $"Paid: ₹ {amountPaid:#,##0.00}\n" +
-                           $"Change: ₹ {change:#,##0.00}\n" +
-                           $"Method: {paymentMethod}";
-
-            MessageBoxResult printResult = MessageBox.Show(message + "\n\nPrint Relaword format bill?",
-                                                         "Payment Complete",
-                                                         MessageBoxButton.YesNo,
-                                                         MessageBoxImage.Information);
-
-            if (printResult == MessageBoxResult.Yes)
+            try
             {
-                // Auto-print in Relaword format
-                PrintRelawordBill(invoice);
-            }
+                // Disable button to prevent double-clicking
+                btnProcessPayment.IsEnabled = false;
 
-            // Clear bill and start new
-            BillItems.Clear();
-            txtDiscountInput.Text = "0";
-            txtAmountPaid.Text = "0.00";
-            txtBillNo.Text = "BILL-" + DateTime.Now.ToString("yyyyMMddHHmmss");
-            UpdateBillSummary();
+                decimal change = amountPaid - GrandTotal;
+                string paymentMethod = GetSelectedPaymentMethod();
+
+                // Create sale DTO
+                var saleDto = new CreateSaleDto
+                {
+                    CustomerId = null, // Walk-in customer
+                    UserId = _currentUserId,
+                    SessionId = _currentSessionId,
+                    SubTotal = SubTotal,
+                    TaxAmount = Tax,
+                    DiscountAmount = Discount,
+                    GrandTotal = GrandTotal,
+                    PaymentMethod = paymentMethod,
+                    AmountPaid = amountPaid,
+                    Items = BillItems.Select(bi => new CreateSaleItemDto
+                    {
+                        ProductId = int.Parse(bi.ProductId),
+                        Quantity = bi.Quantity,
+                        UnitPrice = bi.Price
+                    }).ToList()
+                };
+
+                // Save sale to database
+                var result = await _salesService.CreateSaleAsync(saleDto);
+
+                if (!result.Success)
+                {
+                    MessageBox.Show($"Error saving sale: {result.Message}", "Sale Error",
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    btnProcessPayment.IsEnabled = true;
+                    return;
+                }
+
+                // Create invoice for printing
+                Invoice invoice = CreateInvoiceFromCurrentBill(amountPaid, change, paymentMethod);
+                invoice.InvoiceNumber = $"INV-{result.SaleId:D6}";
+
+                // Show success message
+                string message = $"✅ PAYMENT SUCCESSFUL!\n\n" +
+                               $"Invoice: {invoice.InvoiceNumber}\n" +
+                               $"Total: ₹ {GrandTotal:#,##0.00}\n" +
+                               $"Paid: ₹ {amountPaid:#,##0.00}\n" +
+                               $"Change: ₹ {change:#,##0.00}\n" +
+                               $"Method: {paymentMethod}\n\n" +
+                               $"✅ Sale saved to database!\n" +
+                               $"✅ Inventory updated!";
+
+                MessageBoxResult printResult = MessageBox.Show(message + "\n\nPrint Relaword format bill?",
+                                                             "Payment Complete",
+                                                             MessageBoxButton.YesNo,
+                                                             MessageBoxImage.Information);
+
+                if (printResult == MessageBoxResult.Yes)
+                {
+                    // Auto-print in Relaword format
+                    PrintRelawordBill(invoice);
+                }
+
+                // Clear bill and start new
+                BillItems.Clear();
+                txtDiscountInput.Text = "0";
+                txtAmountPaid.Text = "0.00";
+                txtBillNo.Text = "BILL-" + DateTime.Now.ToString("yyyyMMddHHmmss");
+                UpdateBillSummary();
+
+                // Reload products to show updated stock
+                LoadProductsAsync();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error processing payment: {ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                btnProcessPayment.IsEnabled = true;
+            }
         }
 
         private void btnBarcode_Click(object sender, RoutedEventArgs e)
@@ -980,7 +1055,7 @@ namespace POSSystem.UI.Views.Sales
         }
 
         // ==================== SUPPORTING CLASSES ====================
-        public class ProductItem
+        public class ProductDisplayModel
         {
             public string Id { get; set; }
             public string Name { get; set; }

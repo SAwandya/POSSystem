@@ -15,13 +15,26 @@
   <ItemGroup>
     <PackageReference Include="MaterialDesignColors" Version="5.3.0" />
     <PackageReference Include="MaterialDesignThemes" Version="5.3.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="9.0.0" />
     <PackageReference Include="OxyPlot.WindowsForms" Version="2.2.0" />
-	  <!-- Add to your .csproj file -->
-	  <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
+    <PackageReference Include="OxyPlot.Wpf" Version="2.1.2" />
   </ItemGroup>
 
   <ItemGroup>
     <Resource Include="ready-stock.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\POSSystem.Application\POSSystem.Application.csproj" />
+    <ProjectReference Include="..\POSSystem.Infrastructure\POSSystem.Infrastructure.csproj" />
+    <ProjectReference Include="..\POSSystem.Domain\POSSystem.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
