@@ -1,7 +1,8 @@
-﻿
+﻿using Microsoft.Extensions.DependencyInjection;
 using POSSystem.UI.Views.Customer;
 using POSSystem.UI.Views.GRN;
 using POSSystem.UI.Views.inventory;
+using POSSystem.UI.Views.Products;
 using POSSystem.UI.Views.Reports;
 using POSSystem.UI.Views.Stock;
 using System;
@@ -30,7 +31,6 @@ namespace POSSystem.UI.Views.Dashboard
 
         private void SalesMenuButton_Click(object sender, RoutedEventArgs e)
         {
-
             ShowMessage("Sales Menu clicked");
         }
 
@@ -52,58 +52,42 @@ namespace POSSystem.UI.Views.Dashboard
         // Quick Actions Events
         private void NewSaleButton_Click(object sender, RoutedEventArgs e)
         {
-
-            
-
             ShowMessage("New Sale clicked");
         }
 
         private void StockButton_Click(object sender, RoutedEventArgs e)
         {
-
             try
             {
-                var inventory = new Inventory();
+                // Get Inventory from DI container
+                var app = (App)System.Windows.Application.Current;
+                var inventory = app.ServiceProvider.GetRequiredService<Inventory>();
                 inventory.Show();
-
-
-
-                // Optional: If you want to close dashboard when opening GRN
-                // this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening GRN: {ex.Message}",
+                MessageBox.Show($"Error opening Inventory: {ex.Message}\n\n{ex.InnerException?.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-
         }
 
         private void CustomersButton_Click(object sender, RoutedEventArgs e)
         {
             var customerPage = new CustomerPage();
             customerPage.Show();
-
-
-
             ShowMessage("Customers clicked");
         }
 
         private void ReportsButton_Click(object sender, RoutedEventArgs e)
         {
-
             try
             {
                 var Report = new ReportDashboards();
                 Report.Show();
-
-                // Optional: If you want to close dashboard when opening GRN
-                // this.Close();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error opening GRN: {ex.Message}",
+                MessageBox.Show($"Error opening Reports: {ex.Message}",
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
@@ -114,9 +98,6 @@ namespace POSSystem.UI.Views.Dashboard
             {
                 var grnWindow = new GRNPage();
                 grnWindow.Show();
-
-                // Optional: If you want to close dashboard when opening GRN
-                // this.Close();
             }
             catch (Exception ex)
             {
@@ -124,9 +105,6 @@ namespace POSSystem.UI.Views.Dashboard
                     "Error", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
-
-        
 
         private void PurchaseOrderButton_Click(object sender, RoutedEventArgs e)
         {
@@ -145,16 +123,13 @@ namespace POSSystem.UI.Views.Dashboard
 
         private void StockCheckButton_Click(object sender, RoutedEventArgs e)
         {
-
             StockPage stockpage = new StockPage();
             stockpage.Show();
-
         }
 
         private void ReturnsButton_Click(object sender, RoutedEventArgs e)
         {
             ShowMessage("Returns clicked");
-            
         }
 
         private void CashDrawerButton_Click(object sender, RoutedEventArgs e)
@@ -165,6 +140,22 @@ namespace POSSystem.UI.Views.Dashboard
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             ShowMessage("Settings clicked");
+        }
+
+        private void ItemRegistryButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get ItemRegistryPage from DI container
+                var app = (App)System.Windows.Application.Current;
+                var itemRegistry = app.ServiceProvider.GetRequiredService<ItemRegistryPage>();
+                itemRegistry.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Item Registry: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // Footer Events

@@ -1,4 +1,5 @@
-﻿using POSSystem.UI.Views.Dashboard;
+﻿using Microsoft.Extensions.DependencyInjection;
+using POSSystem.UI.Views.Dashboard;
 using POSSystem.UI.Views.Sales;
 using System;
 using System.Windows;
@@ -44,28 +45,25 @@ namespace POSSystem.UI
 
         private void LoginButton_Click(object sender, RoutedEventArgs e)
         {
-
             var username = UsernameBox.Text;
             var password = PasswordBox.Password;
 
             if(username == "bill" && password == "123")
             {
-
-                BillingPage billpage = new BillingPage();
+                // Get BillingPage from DI container
+                var app = (App)System.Windows.Application.Current;
+                var billpage = app.ServiceProvider.GetRequiredService<BillingPage>();
                 billpage.Show();
                 this.Close();
-
             }
             else
             {
-                Dashboard dashboard = new Dashboard();
+                // Get Dashboard from DI container
+                var app = (App)System.Windows.Application.Current;
+                var dashboard = app.ServiceProvider.GetRequiredService<Dashboard>();
                 dashboard.Show();
                 this.Close();
             }
-
-           
-
-           
         }
 
         private void ForgotPasswordButton_Click(object sender, RoutedEventArgs e)
@@ -79,7 +77,7 @@ namespace POSSystem.UI
                 MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (result == MessageBoxResult.Yes)
-                Application.Current.Shutdown();
+                System.Windows.Application.Current.Shutdown();
         }
 
         private void ShowStatusMessage(string message, bool isError)

@@ -1,8 +1,1 @@
-
-namespace POSSystem.Domain
-{
-    public class Class1
-    {
-    }
-
-}
+// This file will be replaced with proper entities
