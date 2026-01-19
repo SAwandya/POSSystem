@@ -66,6 +66,7 @@ namespace POSSystem.UI.Views.Products
                         ProductName = product.Name,
                         Barcode = product.Barcode ?? "N/A",
                         Category = product.Category,
+                        SubCategory = product.SubCategory,
                         SellingPrice = product.SellingPrice,
                         Quantity = (int)product.Quantity,
                         AlertQty = product.AlertQty,
@@ -262,6 +263,7 @@ namespace POSSystem.UI.Views.Products
         public string ProductName { get; set; } = string.Empty;
         public string? Barcode { get; set; }
         public string Category { get; set; } = string.Empty;
+        public string SubCategory { get; set; } = string.Empty;
         public decimal SellingPrice { get; set; }
         public int Quantity { get; set; }
         public int AlertQty { get; set; }
@@ -501,6 +503,22 @@ namespace POSSystem.UI.Views.Products
                 Padding = new Thickness(10, 8, 10, 8),
                 FontSize = 14
             };
+
+            // Set style for dropdown items to have dark background and white text
+            var itemContainerStyle = new Style(typeof(ComboBoxItem));
+            itemContainerStyle.Setters.Add(new Setter(ComboBoxItem.BackgroundProperty, 
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(37, 37, 64))));
+            itemContainerStyle.Setters.Add(new Setter(ComboBoxItem.ForegroundProperty, 
+                System.Windows.Media.Brushes.White));
+            
+            // Hover effect
+            var hoverTrigger = new Trigger { Property = ComboBoxItem.IsMouseOverProperty, Value = true };
+            hoverTrigger.Setters.Add(new Setter(ComboBoxItem.BackgroundProperty, 
+                new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(58, 58, 94))));
+            itemContainerStyle.Triggers.Add(hoverTrigger);
+            
+            comboBox.ItemContainerStyle = itemContainerStyle;
+
             panel.Children.Add(comboBox);
             return comboBox;
         }

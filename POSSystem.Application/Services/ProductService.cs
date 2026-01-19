@@ -153,6 +153,7 @@ public class ProductService : IProductService
             Barcode = product.Barcode,
             Description = product.Description,
             Category = product.SubCategory?.Category?.Name ?? "Uncategorized",
+            SubCategory = product.SubCategory?.Name ?? "Uncategorized",
             SellingPrice = product.Inventory?.SellingPrice ?? 0,
             Quantity = product.Inventory?.Quantity ?? 0,
             AlertQty = product.AlertQty,

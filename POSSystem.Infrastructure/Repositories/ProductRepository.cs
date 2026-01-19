@@ -10,6 +10,16 @@ public class ProductRepository : Repository<Product>, IProductRepository
     {
     }
 
+    // Override GetAllAsync to include navigation properties
+    public override async Task<IEnumerable<Product>> GetAllAsync()
+    {
+        return await _dbSet
+            .Include(p => p.Inventory)
+            .Include(p => p.SubCategory)
+                .ThenInclude(sc => sc!.Category)
+            .ToListAsync();
+    }
+
     public async Task<Product?> GetByBarcodeAsync(string barcode)
     {
         return await _dbSet

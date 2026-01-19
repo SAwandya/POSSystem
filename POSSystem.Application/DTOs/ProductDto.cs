@@ -7,6 +7,7 @@ public class ProductDto
     public string? Barcode { get; set; }
     public string? Description { get; set; }
     public string Category { get; set; } = string.Empty;
+    public string SubCategory { get; set; } = string.Empty;
     public decimal SellingPrice { get; set; }
     public decimal Quantity { get; set; }
     public int AlertQty { get; set; }
