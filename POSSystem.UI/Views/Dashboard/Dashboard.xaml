@@ -556,8 +556,11 @@
                             </StackPanel>
                         </Border>
 
-                        <!-- Cards Grid - 4x3 instead of 4x4 -->
-                        <UniformGrid Grid.Row="1" Columns="4" Rows="3" Margin="0">
+                        <!-- Scrollable Cards Grid - WRAPPED IN SCROLLVIEWER -->
+                        <ScrollViewer Grid.Row="1" 
+                                    VerticalScrollBarVisibility="Auto" 
+                                    HorizontalScrollBarVisibility="Disabled">
+                            <UniformGrid Columns="4" Margin="0">
 
                             <!-- New Sale -->
                             <Button x:Name="NewSaleButton" Style="{StaticResource ModernCardButton}" Click="NewSaleButton_Click">
@@ -789,7 +792,50 @@
                                              Margin="0,3,0,0"/>
                                 </StackPanel>
                             </Button>
+
+                            <!-- Settings -->
+                            <Button x:Name="SettingsButton" Style="{StaticResource ModernCardButton}" Click="SettingsButton_Click">
+                                <StackPanel>
+                                    <Border Width="50" Height="50" CornerRadius="12" 
+                                            Background="#FF8B5DFF"
+                                            Margin="0,0,0,10">
+                                        <TextBlock Text="⚙️" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Settings" 
+                                             FontSize="13" 
+                                             FontWeight="Bold" 
+                                             Foreground="{StaticResource TextPrimary}"
+                                             HorizontalAlignment="Center"/>
+                                    <TextBlock Text="System config" 
+                                             FontSize="10" 
+                                             Foreground="{StaticResource TextSecondary}"
+                                             HorizontalAlignment="Center"
+                                             Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </Button>
+
+                            <!-- Item Registry (NEW) -->
+                            <Button x:Name="ItemRegistryButton" Style="{StaticResource ModernCardButton}" Click="ItemRegistryButton_Click">
+                                <StackPanel>
+                                    <Border Width="50" Height="50" CornerRadius="12" 
+                                            Background="#FF00D4FF"
+                                            Margin="0,0,0,10">
+                                        <TextBlock Text="📋" FontSize="24" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                    </Border>
+                                    <TextBlock Text="Item Registry" 
+                                             FontSize="13" 
+                                             FontWeight="Bold" 
+                                             Foreground="{StaticResource TextPrimary}"
+                                             HorizontalAlignment="Center"/>
+                                    <TextBlock Text="Product master" 
+                                             FontSize="10" 
+                                             Foreground="{StaticResource TextSecondary}"
+                                             HorizontalAlignment="Center"
+                                             Margin="0,3,0,0"/>
+                                </StackPanel>
+                            </Button>
                         </UniformGrid>
+                        </ScrollViewer>
                     </Grid>
                 </Grid>
             </Grid>

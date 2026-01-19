@@ -72,6 +72,7 @@ public partial class App : System.Windows.Application
         services.AddTransient<Views.Sales.BillingPage>();
         services.AddTransient<Views.inventory.Inventory>();
         services.AddTransient<Views.Stock.StockPage>();
+        services.AddTransient<Views.Products.ItemRegistryPage>();
     }
 
     private void InitializeDatabase()

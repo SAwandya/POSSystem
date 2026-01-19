@@ -2,6 +2,7 @@
 using POSSystem.UI.Views.Customer;
 using POSSystem.UI.Views.GRN;
 using POSSystem.UI.Views.inventory;
+using POSSystem.UI.Views.Products;
 using POSSystem.UI.Views.Reports;
 using POSSystem.UI.Views.Stock;
 using System;
@@ -139,6 +140,22 @@ namespace POSSystem.UI.Views.Dashboard
         private void SettingsButton_Click(object sender, RoutedEventArgs e)
         {
             ShowMessage("Settings clicked");
+        }
+
+        private void ItemRegistryButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Get ItemRegistryPage from DI container
+                var app = (App)System.Windows.Application.Current;
+                var itemRegistry = app.ServiceProvider.GetRequiredService<ItemRegistryPage>();
+                itemRegistry.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Item Registry: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         // Footer Events
