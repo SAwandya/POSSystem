@@ -66,6 +66,7 @@ namespace POSSystem.UI.Views.Products
                         ProductName = product.Name,
                         Barcode = product.Barcode ?? "N/A",
                         Category = product.Category,
+                        SubCategory = product.SubCategory,
                         SellingPrice = product.SellingPrice,
                         Quantity = (int)product.Quantity,
                         AlertQty = product.AlertQty,
@@ -262,6 +263,7 @@ namespace POSSystem.UI.Views.Products
         public string ProductName { get; set; } = string.Empty;
         public string? Barcode { get; set; }
         public string Category { get; set; } = string.Empty;
+        public string SubCategory { get; set; } = string.Empty;
         public decimal SellingPrice { get; set; }
         public int Quantity { get; set; }
         public int AlertQty { get; set; }
