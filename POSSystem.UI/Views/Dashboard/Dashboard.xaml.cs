@@ -158,6 +158,20 @@ namespace POSSystem.UI.Views.Dashboard
             }
         }
 
+        private void SuppliersButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var suppliersPage = new POSSystem.UI.Views.Suppliers.SuppliersPage();
+                suppliersPage.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Suppliers: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Footer Events
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {
