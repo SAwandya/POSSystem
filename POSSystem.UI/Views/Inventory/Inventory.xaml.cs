@@ -59,7 +59,7 @@ namespace POSSystem.UI.Views.inventory
                         SKU = product.Barcode ?? $"SKU-{product.ProductId:D6}",
                         CurrentStock = (int)product.Quantity,
                         MinStock = product.AlertQty,
-                        Price = product.SellingPrice
+                        Price = product.UnitPrice  // Changed from SellingPrice to UnitPrice
                     };
 
                     // Set status based on stock levels

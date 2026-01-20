@@ -70,6 +70,7 @@ public class ProductService : IProductService
             Description = dto.Description,
             SubCatId = subCatId, // Can be null - database allows it
             UnitMeasure = string.IsNullOrWhiteSpace(dto.UnitMeasure) ? "pcs" : dto.UnitMeasure,
+            UnitPrice = dto.UnitPrice,
             AlertQty = dto.AlertQty,
             IsActive = true
         };
@@ -154,6 +155,7 @@ public class ProductService : IProductService
             Description = product.Description,
             Category = product.SubCategory?.Category?.Name ?? "Uncategorized",
             SubCategory = product.SubCategory?.Name ?? "Uncategorized",
+            UnitPrice = product.UnitPrice,
             SellingPrice = product.Inventory?.SellingPrice ?? 0,
             Quantity = product.Inventory?.Quantity ?? 0,
             AlertQty = product.AlertQty,
