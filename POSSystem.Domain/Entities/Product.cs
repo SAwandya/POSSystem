@@ -1,3 +1,5 @@
+using System.ComponentModel.DataAnnotations.Schema;
+
 namespace POSSystem.Domain.Entities;
 
 public class Product
@@ -8,6 +10,10 @@ public class Product
     public string? Barcode { get; set; }
     public string? Description { get; set; }
     public string UnitMeasure { get; set; } = "pcs";
+
+    [Column("unit_price")]
+    public decimal UnitPrice { get; set; } = 0;
+
     public int AlertQty { get; set; } = 10;
     public bool IsActive { get; set; } = true;
     public DateTime CreatedAt { get; set; } = DateTime.Now;

@@ -67,7 +67,7 @@ namespace POSSystem.UI.Views.Products
                         Barcode = product.Barcode ?? "N/A",
                         Category = product.Category,
                         SubCategory = product.SubCategory,
-                        SellingPrice = product.SellingPrice,
+                        SellingPrice = product.UnitPrice,  // Changed to display UnitPrice
                         Quantity = (int)product.Quantity,
                         AlertQty = product.AlertQty,
                         Status = product.IsActive ? "Active" : "Inactive"
@@ -281,6 +281,7 @@ namespace POSSystem.UI.Views.Products
         private TextBox txtDescription;
         private ComboBox cmbCategory;
         private ComboBox cmbSubCategory;
+        private TextBox txtUnitPrice;
         private TextBox txtSellingPrice;
         private TextBox txtCostPrice;
         private TextBox txtInitialStock;
@@ -298,7 +299,7 @@ namespace POSSystem.UI.Views.Products
 
             Title = "Add New Product - Advanced";
             Width = 600;
-            Height = 700;
+            Height = 750;
             WindowStartupLocation = WindowStartupLocation.CenterOwner;
             Background = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(26, 26, 46));
 
@@ -313,7 +314,7 @@ namespace POSSystem.UI.Views.Products
             // Title
             var title = new TextBlock
             {
-                Text = "? Add New Product",
+                Text = "?? Add New Product",
                 FontSize = 22,
                 FontWeight = FontWeights.Bold,
                 Foreground = System.Windows.Media.Brushes.White,
@@ -342,6 +343,10 @@ namespace POSSystem.UI.Views.Products
             AddLabel(mainPanel, "SubCategory: *");
             cmbSubCategory = AddComboBox(mainPanel);
 
+            // Unit Price
+            AddLabel(mainPanel, "Unit Price (Cost Price - Rs): *");
+            txtUnitPrice = AddTextBox(mainPanel);
+
             // Selling Price
             AddLabel(mainPanel, "Selling Price (Rs): *");
             txtSellingPrice = AddTextBox(mainPanel);
@@ -358,7 +363,7 @@ namespace POSSystem.UI.Views.Products
             AddLabel(mainPanel, "Alert Quantity (Low Stock): *");
             txtAlertQty = AddTextBox(mainPanel, "10");
 
-            // Unit Measure
+            // Unit of Measure
             AddLabel(mainPanel, "Unit of Measure:");
             txtUnitMeasure = AddTextBox(mainPanel, "pcs");
 
@@ -547,6 +552,13 @@ namespace POSSystem.UI.Views.Products
                 return;
             }
 
+            if (!decimal.TryParse(txtUnitPrice.Text, out decimal unitPrice) || unitPrice < 0)
+            {
+                MessageBox.Show("Please enter a valid unit price", "Validation Error",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
             if (!decimal.TryParse(txtSellingPrice.Text, out decimal sellingPrice) || sellingPrice <= 0)
             {
                 MessageBox.Show("Please enter a valid selling price", "Validation Error",
@@ -583,6 +595,7 @@ namespace POSSystem.UI.Views.Products
                     Barcode = string.IsNullOrWhiteSpace(txtBarcode.Text) ? null : txtBarcode.Text.Trim(),
                     Description = string.IsNullOrWhiteSpace(txtDescription.Text) ? null : txtDescription.Text.Trim(),
                     SubCatId = selectedSubCat?.SubCatId,
+                    UnitPrice = unitPrice,
                     SellingPrice = sellingPrice,
                     InitialQuantity = initialStock,
                     AlertQty = alertQty,
