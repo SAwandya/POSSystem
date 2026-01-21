@@ -122,7 +122,16 @@ namespace POSSystem.UI.Views.Dashboard
 
         private void InvoiceHistoryButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessage("Invoice History clicked");
+            try
+            {
+                var invoicesPage = new POSSystem.UI.Views.Sales.InvoicesPage();
+                invoicesPage.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Invoice History: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void QuickSaleButton_Click(object sender, RoutedEventArgs e)
