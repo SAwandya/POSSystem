@@ -52,7 +52,16 @@ namespace POSSystem.UI.Views.Dashboard
         // Quick Actions Events
         private void NewSaleButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessage("New Sale clicked");
+            try
+            {
+                var newSalePage = new POSSystem.UI.Views.Sales.NewSalePage();
+                newSalePage.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening New Sale page: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void StockButton_Click(object sender, RoutedEventArgs e)
