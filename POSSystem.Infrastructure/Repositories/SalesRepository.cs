@@ -18,6 +18,7 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
             .Include(s => s.Customer)
             .Include(s => s.User)
             .Include(s => s.Payments)
+            .AsSplitQuery() // Prevents cartesian explosion
             .FirstOrDefaultAsync(s => s.SaleId == saleId);
     }
 
@@ -25,8 +26,10 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
     {
         return await _dbSet
             .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Product)
             .Include(s => s.Customer)
             .Include(s => s.Payments)
+            .AsSplitQuery() // Prevents cartesian explosion
             .Where(s => s.SaleDate >= startDate && s.SaleDate <= endDate)
             .OrderByDescending(s => s.SaleDate)
             .ToListAsync();
