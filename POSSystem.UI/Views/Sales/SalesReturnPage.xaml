@@ -32,6 +32,42 @@
         <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
         <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0D0"/>
 
+        <!-- Tab Button Style -->
+        <Style x:Key="TabButton" TargetType="RadioButton">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Padding" Value="30,0"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="RadioButton">
+                        <Border Background="{TemplateBinding Background}" 
+                                BorderThickness="0,0,0,3"
+                                BorderBrush="Transparent"
+                                x:Name="BorderElement">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                            VerticalAlignment="Center"
+                                            Margin="{TemplateBinding Padding}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="BorderElement" Property="BorderBrush" Value="{StaticResource PrimaryPurple}"/>
+                                <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+                                <Setter TargetName="BorderElement" Property="Background" Value="{StaticResource DarkSurface}"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="BorderElement" Property="Background" Value="{StaticResource DarkSurface}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
         <!-- DatePicker Style -->
         <Style TargetType="DatePicker">
             <Setter Property="Background" Value="Black"/>
@@ -234,6 +270,7 @@
     <Grid Margin="20">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -252,7 +289,7 @@
                     </Border>
                     <StackPanel VerticalAlignment="Center">
                         <TextBlock Text="SALES RETURN CENTER" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
-                        <TextBlock Text="Click on any invoice to process return" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,0"/>
+                        <TextBlock Text="Choose your preferred return method below" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,0"/>
                     </StackPanel>
                 </StackPanel>
 
@@ -260,102 +297,251 @@
             </Grid>
         </Border>
 
-        <!-- Main Content -->
-        <Grid Grid.Row="1">
-            <Grid.RowDefinitions>
-                <RowDefinition Height="Auto"/>
-                <RowDefinition Height="*"/>
-            </Grid.RowDefinitions>
+        <!-- Tab Selector -->
+        <Border Grid.Row="1" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="0" Margin="0,0,0,15">
+            <StackPanel Orientation="Horizontal">
+                <RadioButton x:Name="rbInvoiceFirst" 
+                             Content="?? Invoice First" 
+                             Style="{StaticResource TabButton}"
+                             IsChecked="True"
+                             Checked="TabChanged"/>
+                <RadioButton x:Name="rbProductFirst" 
+                             Content="??? Product First" 
+                             Style="{StaticResource TabButton}"
+                             Checked="TabChanged"/>
+            </StackPanel>
+        </Border>
 
-            <!-- Search Bar -->
-            <Border Grid.Row="0" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20" Margin="0,0,0,15">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="2*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="*"/>
-                        <ColumnDefinition Width="Auto"/>
-                    </Grid.ColumnDefinitions>
+        <!-- Main Content Area -->
+        <Grid Grid.Row="2">
+            <!-- Invoice First Panel (Default) -->
+            <Grid x:Name="InvoiceFirstPanel" Visibility="Visible">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
 
-                    <StackPanel Grid.Column="0" Margin="0,0,15,0">
-                        <TextBlock Text="?? Search Invoice" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                        <TextBox x:Name="txtInvoiceSearch" 
-                                 Height="45"
-                                 Padding="12"
-                                 VerticalContentAlignment="Center"
-                                 Background="{StaticResource DarkSurface}" 
-                                 Foreground="{StaticResource TextPrimary}"
-                                 BorderBrush="{StaticResource DarkBorder}"
-                                 BorderThickness="1"
-                                 FontSize="14"
-                                 KeyDown="InvoiceSearch_KeyDown"/>
-                    </StackPanel>
+                <!-- Search Bar -->
+                <Border Grid.Row="0" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-                    <StackPanel Grid.Column="1" Margin="0,0,15,0">
-                        <TextBlock Text="From Date" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                        <DatePicker x:Name="dpInvoiceStartDate"/>
-                    </StackPanel>
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Text="?? Search Invoice" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                            <TextBox x:Name="txtInvoiceSearch" 
+                                     Height="45"
+                                     Padding="12"
+                                     VerticalContentAlignment="Center"
+                                     Background="{StaticResource DarkSurface}" 
+                                     Foreground="{StaticResource TextPrimary}"
+                                     BorderBrush="{StaticResource DarkBorder}"
+                                     BorderThickness="1"
+                                     FontSize="14"
+                                     KeyDown="InvoiceSearch_KeyDown"/>
+                        </StackPanel>
 
-                    <StackPanel Grid.Column="2" Margin="0,0,15,0">
-                        <TextBlock Text="To Date" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
-                        <DatePicker x:Name="dpInvoiceEndDate"/>
-                    </StackPanel>
+                        <StackPanel Grid.Column="1" Margin="0,0,15,0">
+                            <TextBlock Text="From Date" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="dpInvoiceStartDate"/>
+                        </StackPanel>
 
-                    <Button Grid.Column="3" Content="?? Search" Style="{StaticResource ModernButton}" Width="130" VerticalAlignment="Bottom" Click="SearchInvoices_Click"/>
-                </Grid>
-            </Border>
+                        <StackPanel Grid.Column="2" Margin="0,0,15,0">
+                            <TextBlock Text="To Date" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                            <DatePicker x:Name="dpInvoiceEndDate"/>
+                        </StackPanel>
 
-            <!-- Invoices List -->
-            <Border Grid.Row="1" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20">
-                <Grid>
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto"/>
-                        <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
-                    </Grid.RowDefinitions>
+                        <Button Grid.Column="3" Content="?? Search" Style="{StaticResource ModernButton}" Width="130" VerticalAlignment="Bottom" Click="SearchInvoices_Click"/>
+                    </Grid>
+                </Border>
 
-                    <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
-                        <TextBlock Text="?? INVOICES" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
-                        <TextBlock x:Name="txtInvoiceCount" Text="(0 found)" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="10,0,0,0" VerticalAlignment="Center"/>
-                    </StackPanel>
+                <!-- Invoices List -->
+                <Border Grid.Row="1" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
 
-                    <DataGrid x:Name="dgInvoices" 
-                              Grid.Row="1" 
-                              Style="{StaticResource ReturnDataGrid}" 
-                              MouseDoubleClick="Invoice_DoubleClick"
-                              SelectionChanged="Invoice_SelectionChanged">
-                        <DataGrid.Columns>
-                            <DataGridTextColumn Header="Invoice #" Width="140" Binding="{Binding InvoiceNumber}"/>
-                            <DataGridTextColumn Header="Date" Width="180" Binding="{Binding SaleDate, StringFormat='{}{0:dd MMM yyyy hh:mm tt}'}"/>
-                            <DataGridTextColumn Header="Customer" Width="*" Binding="{Binding CustomerName}"/>
-                            <DataGridTextColumn Header="Items" Width="80" Binding="{Binding Items.Count}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Center"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                            <DataGridTextColumn Header="Total" Width="140" Binding="{Binding GrandTotal, StringFormat='Rs {0:#,##0.00}'}">
-                                <DataGridTextColumn.ElementStyle>
-                                    <Style TargetType="TextBlock">
-                                        <Setter Property="HorizontalAlignment" Value="Right"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                        <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
-                                        <Setter Property="FontSize" Value="14"/>
-                                    </Style>
-                                </DataGridTextColumn.ElementStyle>
-                            </DataGridTextColumn>
-                        </DataGrid.Columns>
-                    </DataGrid>
+                        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,0,0,15">
+                            <TextBlock Text="?? INVOICES" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+                            <TextBlock x:Name="txtInvoiceCount" Text="(0 found)" FontSize="14" Foreground="{StaticResource TextSecondary}" Margin="10,0,0,0" VerticalAlignment="Center"/>
+                        </StackPanel>
 
-                    <Border Grid.Row="2" Background="{StaticResource DarkSurface}" CornerRadius="8" Padding="15" Margin="0,15,0,0">
-                        <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}">
-                            <Run Text="?? Tip:"/>
-                            <Run Text=" Click on any invoice row to process return (double-click or single-click works)" FontStyle="Italic"/>
-                        </TextBlock>
-                    </Border>
-                </Grid>
-            </Border>
+                        <DataGrid x:Name="dgInvoices" 
+                                  Grid.Row="1" 
+                                  Style="{StaticResource ReturnDataGrid}" 
+                                  MouseDoubleClick="Invoice_DoubleClick"
+                                  SelectionChanged="Invoice_SelectionChanged">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Invoice #" Width="140" Binding="{Binding InvoiceNumber}"/>
+                                <DataGridTextColumn Header="Date" Width="180" Binding="{Binding SaleDate, StringFormat='{}{0:dd MMM yyyy hh:mm tt}'}"/>
+                                <DataGridTextColumn Header="Customer" Width="*" Binding="{Binding CustomerName}"/>
+                                <DataGridTextColumn Header="Items" Width="80" Binding="{Binding Items.Count}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Center"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                                <DataGridTextColumn Header="Total" Width="140" Binding="{Binding GrandTotal, StringFormat='Rs {0:#,##0.00}'}">
+                                    <DataGridTextColumn.ElementStyle>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="HorizontalAlignment" Value="Right"/>
+                                            <Setter Property="FontWeight" Value="Bold"/>
+                                            <Setter Property="Foreground" Value="{StaticResource SuccessGreen}"/>
+                                            <Setter Property="FontSize" Value="14"/>
+                                        </Style>
+                                    </DataGridTextColumn.ElementStyle>
+                                </DataGridTextColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+
+                        <Border Grid.Row="2" Background="{StaticResource DarkSurface}" CornerRadius="8" Padding="15" Margin="0,15,0,0">
+                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}">
+                                <Run Text="?? Tip:"/>
+                                <Run Text=" Click on any invoice row to process return (double-click or single-click works)" FontStyle="Italic"/>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
+
+            <!-- Product First Panel -->
+            <Grid x:Name="ProductFirstPanel" Visibility="Collapsed">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <!-- Product Search Bar -->
+                <Border Grid.Row="0" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20" Margin="0,0,0,15">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <StackPanel Grid.Column="0" Margin="0,0,15,0">
+                            <TextBlock Text="?? Search Product (Barcode / Name / ID)" FontSize="11" Foreground="{StaticResource TextSecondary}" Margin="0,0,0,5"/>
+                            <Grid>
+                                <TextBox x:Name="txtProductSearch" 
+                                         Height="45"
+                                         Padding="12"
+                                         VerticalContentAlignment="Center"
+                                         Background="{StaticResource DarkSurface}" 
+                                         Foreground="{StaticResource TextPrimary}"
+                                         BorderBrush="{StaticResource DarkBorder}"
+                                         BorderThickness="1"
+                                         FontSize="14"
+                                         TextChanged="ProductSearch_TextChanged"
+                                         GotFocus="ProductSearch_GotFocus"
+                                         LostFocus="ProductSearch_LostFocus"
+                                         KeyDown="ProductSearch_KeyDown"/>
+                                
+                                <!-- Product Suggestions Popup -->
+                                <Popup x:Name="ProductSuggestionsPopup"
+                                       PlacementTarget="{Binding ElementName=txtProductSearch}"
+                                       Placement="Bottom"
+                                       Width="{Binding ElementName=txtProductSearch, Path=ActualWidth}"
+                                       StaysOpen="False"
+                                       AllowsTransparency="True">
+                                    <Border Background="{StaticResource DarkCard}"
+                                            BorderBrush="{StaticResource DarkBorder}"
+                                            BorderThickness="1"
+                                            CornerRadius="8"
+                                            MaxHeight="300">
+                                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                                            <ItemsControl x:Name="ProductSuggestionsList">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border Background="Transparent"
+                                                                Padding="12,10"
+                                                                Cursor="Hand"
+                                                                MouseLeftButtonDown="ProductSuggestionItem_Click">
+                                                            <Border.Style>
+                                                                <Style TargetType="Border">
+                                                                    <Setter Property="Background" Value="Transparent"/>
+                                                                    <Style.Triggers>
+                                                                        <Trigger Property="IsMouseOver" Value="True">
+                                                                            <Setter Property="Background" Value="{StaticResource HoverHighlight}"/>
+                                                                        </Trigger>
+                                                                    </Style.Triggers>
+                                                                </Style>
+                                                            </Border.Style>
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <StackPanel Grid.Column="0">
+                                                                    <TextBlock Text="{Binding Name}" 
+                                                                              FontWeight="SemiBold" 
+                                                                              Foreground="{StaticResource TextPrimary}"
+                                                                              FontSize="13"/>
+                                                                    <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}">
+                                                                        <Run Text="ID: "/><Run Text="{Binding ProductId}"/>
+                                                                        <Run Text=" | Barcode: "/><Run Text="{Binding Barcode}"/>
+                                                                        <Run Text=" | Category: "/><Run Text="{Binding CategoryName}"/>
+                                                                    </TextBlock>
+                                                                </StackPanel>
+                                                                <StackPanel Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                                                    <TextBlock Text="{Binding AvailableQty, StringFormat='Qty: {0}'}" 
+                                                                              FontSize="11" 
+                                                                              Foreground="{StaticResource SuccessGreen}"
+                                                                              FontWeight="Bold"/>
+                                                                </StackPanel>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </ScrollViewer>
+                                    </Border>
+                                </Popup>
+                            </Grid>
+                        </StackPanel>
+
+                        <Button Grid.Column="1" Content="?? Search Product" Style="{StaticResource ModernButton}" Width="160" VerticalAlignment="Bottom" Click="SearchProduct_Click"/>
+                    </Grid>
+                </Border>
+
+                <!-- Product-based Return Panel -->
+                <Border Grid.Row="1" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="??? PRODUCT RETURNS" FontSize="18" FontWeight="Bold" Foreground="{StaticResource TextPrimary}" Margin="0,0,0,15"/>
+
+                        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
+                            <StackPanel x:Name="ProductReturnPanel">
+                                <TextBlock Text="Enter product barcode or search by name to start a return" 
+                                          FontSize="14" 
+                                          Foreground="{StaticResource TextSecondary}"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="0,50,0,0"/>
+                            </StackPanel>
+                        </ScrollViewer>
+
+                        <Border Grid.Row="2" Background="{StaticResource DarkSurface}" CornerRadius="8" Padding="15" Margin="0,15,0,0">
+                            <TextBlock FontSize="12" Foreground="{StaticResource TextSecondary}">
+                                <Run Text="?? Tip:"/>
+                                <Run Text=" Scan barcode or type product name. System will find recent sales for that product." FontStyle="Italic"/>
+                            </TextBlock>
+                        </Border>
+                    </Grid>
+                </Border>
+            </Grid>
         </Grid>
     </Grid>
 </Window>
