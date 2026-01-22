@@ -18,7 +18,10 @@ namespace POSSystem.UI.Views.Sales
     {
         private readonly ISalesService _salesService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IProductService _productService;
         private ObservableCollection<SaleDto> _invoices;
+        private ObservableCollection<ProductSuggestionViewModel> _productSuggestions;
+        private List<Product> _allProducts = new List<Product>();
 
         public SalesReturnPage()
         {
@@ -28,14 +31,35 @@ namespace POSSystem.UI.Views.Sales
             var app = (App)System.Windows.Application.Current;
             _salesService = app.ServiceProvider.GetRequiredService<ISalesService>();
             _unitOfWork = app.ServiceProvider.GetRequiredService<IUnitOfWork>();
+            _productService = app.ServiceProvider.GetRequiredService<IProductService>();
 
             // Initialize collections
             _invoices = new ObservableCollection<SaleDto>();
+            _productSuggestions = new ObservableCollection<ProductSuggestionViewModel>();
+            
             dgInvoices.ItemsSource = _invoices;
+            ProductSuggestionsList.ItemsSource = _productSuggestions;
 
             // Set default date range (last 30 days)
             dpInvoiceStartDate.SelectedDate = DateTime.Now.AddDays(-30);
             dpInvoiceEndDate.SelectedDate = DateTime.Now;
+
+            // Load products for suggestions
+            LoadProductsAsync();
+        }
+
+        private async void LoadProductsAsync()
+        {
+            try
+            {
+                var products = await _unitOfWork.Repository<Product>().GetAllAsync();
+                _allProducts = products.Where(p => p.IsActive).ToList();
+            }
+            catch (Exception ex)
+            {
+                // Silently fail - products will be loaded on demand
+                System.Diagnostics.Debug.WriteLine($"Error loading products: {ex.Message}");
+            }
         }
 
         private void Window_Loaded(object sender, RoutedEventArgs e)
@@ -137,6 +161,317 @@ namespace POSSystem.UI.Views.Sales
         private void BackButton_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+
+        // Tab switching logic
+        private void TabChanged(object sender, RoutedEventArgs e)
+        {
+            if (rbInvoiceFirst == null || rbProductFirst == null) return;
+
+            if (rbInvoiceFirst.IsChecked == true)
+            {
+                InvoiceFirstPanel.Visibility = Visibility.Visible;
+                ProductFirstPanel.Visibility = Visibility.Collapsed;
+            }
+            else if (rbProductFirst.IsChecked == true)
+            {
+                InvoiceFirstPanel.Visibility = Visibility.Collapsed;
+                ProductFirstPanel.Visibility = Visibility.Visible;
+                txtProductSearch.Focus();
+            }
+        }
+
+        // Product First approach handlers
+        private void ProductSearch_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Check if popup is initialized
+            if (ProductSuggestionsPopup == null || _productSuggestions == null)
+                return;
+
+            var searchText = txtProductSearch.Text.Trim();
+
+            // Hide popup if empty
+            if (string.IsNullOrWhiteSpace(searchText))
+            {
+                ProductSuggestionsPopup.IsOpen = false;
+                return;
+            }
+
+            // Search products and show suggestions
+            var suggestions = SearchProductsForSuggestions(searchText);
+
+            _productSuggestions.Clear();
+            foreach (var suggestion in suggestions)
+            {
+                _productSuggestions.Add(suggestion);
+            }
+
+            // Show/hide popup based on results
+            ProductSuggestionsPopup.IsOpen = _productSuggestions.Count > 0;
+        }
+
+        private List<ProductSuggestionViewModel> SearchProductsForSuggestions(string searchTerm)
+        {
+            searchTerm = searchTerm.ToLower();
+
+            return _allProducts
+                .Where(p =>
+                    p.ProductId.ToString().Contains(searchTerm) ||
+                    p.Name.ToLower().Contains(searchTerm) ||
+                    (p.Barcode != null && p.Barcode.ToLower().Contains(searchTerm)))
+                .Take(10) // Limit to 10 suggestions
+                .Select(p => new ProductSuggestionViewModel
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Barcode = p.Barcode ?? "N/A",
+                    CategoryName = p.SubCategory?.Category?.Name ?? "N/A",
+                    AvailableQty = (int)(p.Inventory?.Quantity ?? 0)
+                })
+                .ToList();
+        }
+
+        private void ProductSearch_GotFocus(object sender, RoutedEventArgs e)
+        {
+            // Optionally show all products when focused (empty search)
+            if (string.IsNullOrWhiteSpace(txtProductSearch.Text))
+            {
+                // Could show top 10 products here if desired
+            }
+        }
+
+        private void ProductSearch_LostFocus(object sender, RoutedEventArgs e)
+        {
+            // Close popup when focus is lost (with delay to allow click)
+            var timer = new System.Windows.Threading.DispatcherTimer();
+            timer.Interval = TimeSpan.FromMilliseconds(200);
+            timer.Tick += (s, args) =>
+            {
+                if (ProductSuggestionsPopup != null)
+                    ProductSuggestionsPopup.IsOpen = false;
+                timer.Stop();
+            };
+            timer.Start();
+        }
+
+        private void ProductSuggestionItem_Click(object sender, MouseButtonEventArgs e)
+        {
+            if (sender is Border border && border.DataContext is ProductSuggestionViewModel suggestion)
+            {
+                // Set the search text to the selected product
+                txtProductSearch.Text = suggestion.Name;
+                
+                // Close popup
+                if (ProductSuggestionsPopup != null)
+                    ProductSuggestionsPopup.IsOpen = false;
+
+                // Automatically trigger the search
+                SearchProduct_Click(sender, e);
+            }
+        }
+
+        private void ProductSearch_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                // If suggestions are open, select first one
+                if (ProductSuggestionsPopup != null && ProductSuggestionsPopup.IsOpen && _productSuggestions.Count > 0)
+                {
+                    var firstSuggestion = _productSuggestions[0];
+                    txtProductSearch.Text = firstSuggestion.Name;
+                    ProductSuggestionsPopup.IsOpen = false;
+                }
+                
+                SearchProduct_Click(sender, e);
+            }
+            else if (e.Key == Key.Escape)
+            {
+                if (ProductSuggestionsPopup != null)
+                    ProductSuggestionsPopup.IsOpen = false;
+            }
+        }
+
+        private async void SearchProduct_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var searchTerm = txtProductSearch?.Text?.Trim();
+                if (string.IsNullOrWhiteSpace(searchTerm))
+                {
+                    MessageBox.Show("Please enter product barcode, name, or ID", "Search Required",
+                        MessageBoxButton.OK, MessageBoxImage.Warning);
+                    return;
+                }
+
+                // Search for sales containing this product
+                var startDate = DateTime.Now.AddMonths(-3); // Last 3 months
+                var endDate = DateTime.Now;
+                
+                var allSales = await _salesService.GetSalesByDateRangeAsync(startDate, endDate.AddDays(1));
+                
+                // Filter sales that contain the searched product
+                var matchingSales = new List<SaleDto>();
+                
+                foreach (var sale in allSales)
+                {
+                    if (sale.Items != null && sale.Items.Any(item =>
+                        (item.ProductName != null && item.ProductName.ToLower().Contains(searchTerm.ToLower())) ||
+                        item.ProductId.ToString().Contains(searchTerm)))
+                    {
+                        matchingSales.Add(sale);
+                    }
+                }
+
+                if (matchingSales.Count == 0)
+                {
+                    MessageBox.Show($"No recent sales found for product: {searchTerm}", "No Results",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
+                    return;
+                }
+
+                // Show results in a dialog
+                ShowProductSalesDialog(searchTerm, matchingSales);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error searching product sales:\n\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        private void ShowProductSalesDialog(string productSearch, List<SaleDto> sales)
+        {
+            var dialog = new Window
+            {
+                Title = $"Sales for: {productSearch}",
+                Width = 800,
+                Height = 600,
+                WindowStartupLocation = WindowStartupLocation.CenterOwner,
+                Owner = this,
+                Background = new SolidColorBrush(Color.FromRgb(15, 15, 26))
+            };
+
+            var mainGrid = new Grid { Margin = new Thickness(20) };
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = new GridLength(1, GridUnitType.Star) });
+            mainGrid.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+            // Header
+            var header = new TextBlock
+            {
+                Text = $"?? Found {sales.Count} sale(s) containing: {productSearch}",
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                Foreground = Brushes.White,
+                Margin = new Thickness(0, 0, 0, 15)
+            };
+            Grid.SetRow(header, 0);
+            mainGrid.Children.Add(header);
+
+            // DataGrid
+            var dataGrid = new DataGrid
+            {
+                AutoGenerateColumns = false,
+                CanUserAddRows = false,
+                Background = new SolidColorBrush(Color.FromRgb(26, 26, 46)),
+                Foreground = Brushes.White,
+                RowBackground = new SolidColorBrush(Color.FromRgb(26, 26, 46)),
+                AlternatingRowBackground = new SolidColorBrush(Color.FromRgb(37, 37, 64)),
+                GridLinesVisibility = DataGridGridLinesVisibility.None,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(58, 58, 94)),
+                BorderThickness = new Thickness(1),
+                RowHeight = 50,
+                ItemsSource = sales
+            };
+
+            // Create header style
+            var headerStyle = new Style(typeof(System.Windows.Controls.Primitives.DataGridColumnHeader));
+            headerStyle.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.BackgroundProperty, Brushes.Black));
+            headerStyle.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.ForegroundProperty, Brushes.White));
+            headerStyle.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.HeightProperty, 45.0));
+            headerStyle.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.PaddingProperty, new Thickness(10, 0, 10, 0)));
+            headerStyle.Setters.Add(new Setter(System.Windows.Controls.Primitives.DataGridColumnHeader.FontWeightProperty, FontWeights.Bold));
+            dataGrid.ColumnHeaderStyle = headerStyle;
+
+            // Columns
+            dataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Invoice #",
+                Width = new DataGridLength(120),
+                Binding = new System.Windows.Data.Binding("InvoiceNumber")
+            });
+
+            dataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Date",
+                Width = new DataGridLength(150),
+                Binding = new System.Windows.Data.Binding("SaleDate") { StringFormat = "{0:dd MMM yyyy}" }
+            });
+
+            dataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Customer",
+                Width = new DataGridLength(1, DataGridLengthUnitType.Star),
+                Binding = new System.Windows.Data.Binding("CustomerName")
+            });
+
+            dataGrid.Columns.Add(new DataGridTextColumn
+            {
+                Header = "Total",
+                Width = new DataGridLength(120),
+                Binding = new System.Windows.Data.Binding("GrandTotal") { StringFormat = "Rs {0:#,##0.00}" }
+            });
+
+            var selectColumn = new DataGridTemplateColumn
+            {
+                Header = "Action",
+                Width = new DataGridLength(120)
+            };
+
+            var cellTemplate = new DataTemplate();
+            var buttonFactory = new FrameworkElementFactory(typeof(Button));
+            buttonFactory.SetValue(Button.ContentProperty, "Process Return");
+            buttonFactory.SetValue(Button.BackgroundProperty, new SolidColorBrush(Color.FromRgb(139, 93, 255)));
+            buttonFactory.SetValue(Button.ForegroundProperty, Brushes.White);
+            buttonFactory.SetValue(Button.BorderThicknessProperty, new Thickness(0));
+            buttonFactory.SetValue(Button.CursorProperty, Cursors.Hand);
+            buttonFactory.SetValue(Button.HeightProperty, 35.0);
+            buttonFactory.SetValue(Button.MarginProperty, new Thickness(5));
+            buttonFactory.AddHandler(Button.ClickEvent, new RoutedEventHandler((s, e) =>
+            {
+                if (dataGrid.SelectedItem is SaleDto selectedSale)
+                {
+                    dialog.Close();
+                    OpenReturnDialog(selectedSale);
+                }
+            }));
+            cellTemplate.VisualTree = buttonFactory;
+            selectColumn.CellTemplate = cellTemplate;
+            dataGrid.Columns.Add(selectColumn);
+
+            Grid.SetRow(dataGrid, 1);
+            mainGrid.Children.Add(dataGrid);
+
+            // Close button
+            var closeButton = new Button
+            {
+                Content = "Close",
+                Width = 100,
+                Height = 40,
+                Background = Brushes.Transparent,
+                Foreground = Brushes.White,
+                BorderBrush = new SolidColorBrush(Color.FromRgb(58, 58, 94)),
+                BorderThickness = new Thickness(1),
+                Cursor = Cursors.Hand,
+                Margin = new Thickness(0, 15, 0, 0),
+                HorizontalAlignment = HorizontalAlignment.Right
+            };
+            closeButton.Click += (s, e) => dialog.Close();
+            Grid.SetRow(closeButton, 2);
+            mainGrid.Children.Add(closeButton);
+
+            dialog.Content = mainGrid;
+            dialog.ShowDialog();
         }
     }
 
