@@ -138,7 +138,16 @@ namespace POSSystem.UI.Views.Dashboard
 
         private void ReturnsButton_Click(object sender, RoutedEventArgs e)
         {
-            ShowMessage("Returns clicked");
+            try
+            {
+                var salesReturnPage = new POSSystem.UI.Views.Sales.SalesReturnPage();
+                salesReturnPage.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening Sales Return: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void CashDrawerButton_Click(object sender, RoutedEventArgs e)

@@ -152,15 +152,15 @@ public class SalesService : ISalesService
             DiscountAmount = sale.DiscountAmount,
             GrandTotal = sale.GrandTotal,
             PaymentStatus = sale.PaymentStatus.ToString(),
-            Items = sale.SalesItems.Select(si => new SaleItemDto
+            Items = sale.SalesItems?.Select(si => new SaleItemDto
             {
                 ItemId = si.ItemId,
                 ProductId = si.ProductId,
-                ProductName = si.Product.Name,
+                ProductName = si.Product?.Name ?? "Unknown Product",
                 Quantity = si.Quantity,
                 UnitPrice = si.UnitPrice,
                 TotalPrice = si.TotalPrice
-            }).ToList()
+            }).ToList() ?? new List<SaleItemDto>()
         };
     }
 }

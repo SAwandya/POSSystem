@@ -25,6 +25,7 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
     {
         return await _dbSet
             .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Product)
             .Include(s => s.Customer)
             .Include(s => s.Payments)
             .Where(s => s.SaleDate >= startDate && s.SaleDate <= endDate)
@@ -36,6 +37,7 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
     {
         return await _dbSet
             .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Product)
             .Include(s => s.Customer)
             .Include(s => s.Payments)
             .Where(s => s.SessionId == sessionId)
@@ -47,6 +49,7 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
     {
         return await _dbSet
             .Include(s => s.SalesItems)
+                .ThenInclude(si => si.Product)
             .Include(s => s.Payments)
             .Where(s => s.CustomerId == customerId)
             .OrderByDescending(s => s.SaleDate)
