@@ -609,6 +609,7 @@ namespace POSSystem.UI.Views.Sales
         public int ProductId { get; set; }
         public string Name { get; set; } = string.Empty;
         public string Barcode { get; set; } = string.Empty;
+        public string CategoryName { get; set; } = string.Empty;
         public decimal SellingPrice { get; set; }
         public int AvailableQty { get; set; }
         public ProductDto Product { get; set; } = null!;
