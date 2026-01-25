@@ -199,6 +199,20 @@ namespace POSSystem.UI.Views.Dashboard
             }
         }
 
+        private void UserManagementButton_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                var userManagementPage = new POSSystem.UI.Views.Users.UserManagementPage();
+                userManagementPage.Show();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error opening User Management: {ex.Message}\n\n{ex.InnerException?.Message}",
+                    "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
         // Footer Events
         private void HelpButton_Click(object sender, RoutedEventArgs e)
         {

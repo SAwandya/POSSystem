@@ -1,0 +1,173 @@
+<Window x:Class="POSSystem.UI.Views.Users.UserManagementPage"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="User Management - Manage Users and Permissions"
+        WindowState="Maximized"
+        WindowStartupLocation="CenterScreen"
+        Background="#FF0F0F1A"
+        Loaded="Window_Loaded">
+    
+    <Window.Resources>
+        <!-- Color Palette -->
+        <SolidColorBrush x:Key="PrimaryPurple" Color="#FF8B5DFF"/>
+        <SolidColorBrush x:Key="SuccessGreen" Color="#FF00E096"/>
+        <SolidColorBrush x:Key="ErrorRed" Color="#FFFF5E7C"/>
+        <SolidColorBrush x:Key="WarningYellow" Color="#FFFFD166"/>
+        <SolidColorBrush x:Key="DarkCard" Color="#FF1A1A2E"/>
+        <SolidColorBrush x:Key="DarkSurface" Color="#FF252540"/>
+        <SolidColorBrush x:Key="DarkBorder" Color="#FF3A3A5E"/>
+        <SolidColorBrush x:Key="TextPrimary" Color="#FFFFFFFF"/>
+        <SolidColorBrush x:Key="TextSecondary" Color="#FFB0B0D0"/>
+        
+        <!-- Modern Button Style -->
+        <Style x:Key="ModernButton" TargetType="Button">
+            <Setter Property="Background" Value="{StaticResource PrimaryPurple}"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.8"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+        
+        <!-- DataGrid Header Style -->
+        <Style x:Key="DataGridHeaderStyle" TargetType="DataGridColumnHeader">
+            <Setter Property="Background" Value="Black"/>
+            <Setter Property="Foreground" Value="{StaticResource TextPrimary}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource DarkBorder}"/>
+            <Setter Property="BorderThickness" Value="0,0,0,2"/>
+            <Setter Property="Height" Value="50"/>
+            <Setter Property="Padding" Value="15,0"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="13"/>
+        </Style>
+    </Window.Resources>
+    
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <!-- Header -->
+        <Border Grid.Row="0" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="25" Margin="0,0,0,20">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <Border Width="60" Height="60" CornerRadius="15" Background="#FF9C27B0" Margin="0,0,20,0">
+                        <TextBlock Text="?????" FontSize="32" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                    </Border>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="USER MANAGEMENT" FontSize="26" FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                        <TextBlock Text="Manage system users, roles, and permissions" FontSize="13" Foreground="{StaticResource TextSecondary}" Margin="0,5,0,0"/>
+                    </StackPanel>
+                </StackPanel>
+                
+                <Button Grid.Column="2" Content="? Back" Style="{StaticResource ModernButton}" Width="110" Height="50" Click="BackButton_Click"/>
+            </Grid>
+        </Border>
+        
+        <!-- Toolbar -->
+        <Border Grid.Row="1" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20" Margin="0,0,0,15">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                
+                <TextBox x:Name="txtSearch" Grid.Column="0" Height="45" Padding="12" 
+                         VerticalContentAlignment="Center" Background="{StaticResource DarkSurface}" 
+                         Foreground="{StaticResource TextPrimary}" BorderBrush="{StaticResource DarkBorder}" 
+                         BorderThickness="1" FontSize="14" 
+                         Text="Search users by name or username..."
+                         GotFocus="SearchBox_GotFocus"
+                         LostFocus="SearchBox_LostFocus"
+                         TextChanged="Search_TextChanged"/>
+                         
+                <Button Grid.Column="1" Content="? Add New User" Width="160" Height="45" 
+                        Margin="15,0,10,0" Background="{StaticResource SuccessGreen}" 
+                        Foreground="White" BorderThickness="0" FontSize="14" 
+                        FontWeight="Bold" Cursor="Hand" Click="AddUser_Click"
+                        Style="{StaticResource ModernButton}"/>
+                        
+                <Button Grid.Column="2" Content="?? Refresh" Width="120" Height="45" 
+                        Background="{StaticResource PrimaryPurple}" Foreground="White" 
+                        BorderThickness="0" FontSize="14" Cursor="Hand" 
+                        Click="Refresh_Click"
+                        Style="{StaticResource ModernButton}"/>
+            </Grid>
+        </Border>
+        
+        <!-- Users DataGrid -->
+        <Border Grid.Row="2" Background="{StaticResource DarkCard}" CornerRadius="16" Padding="20">
+            <DataGrid x:Name="dgUsers" AutoGenerateColumns="False" 
+                      CanUserAddRows="False" Background="Transparent" 
+                      Foreground="{StaticResource TextPrimary}" 
+                      RowBackground="{StaticResource DarkCard}" 
+                      AlternatingRowBackground="{StaticResource DarkSurface}" 
+                      GridLinesVisibility="None" BorderThickness="0" 
+                      RowHeight="55" HeadersVisibility="Column"
+                      ColumnHeaderStyle="{StaticResource DataGridHeaderStyle}">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="ID" Width="60" Binding="{Binding UserId}"/>
+                    <DataGridTextColumn Header="Username" Width="150" Binding="{Binding Username}"/>
+                    <DataGridTextColumn Header="Full Name" Width="200" Binding="{Binding FullName}"/>
+                    <DataGridTextColumn Header="Role" Width="120" Binding="{Binding Role}"/>
+                    <DataGridTextColumn Header="Status" Width="100" Binding="{Binding StatusText}"/>
+                    <DataGridTextColumn Header="Created" Width="150" Binding="{Binding CreatedAt, StringFormat='{}{0:dd MMM yyyy}'}"/>
+                    <DataGridTemplateColumn Header="Actions" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Left">
+                                    <Button Content="Edit" Width="70" Height="32" Margin="5,0" 
+                                            Background="{StaticResource PrimaryPurple}" Foreground="White" 
+                                            BorderThickness="0" Cursor="Hand" 
+                                            Tag="{Binding UserId}" Click="EditUser_Click"/>
+                                    <Button x:Name="btnToggleStatus" Width="90" Height="32" Margin="5,0" 
+                                            Foreground="White" BorderThickness="0" Cursor="Hand" 
+                                            Tag="{Binding UserId}" Click="ToggleStatus_Click">
+                                        <Button.Style>
+                                            <Style TargetType="Button">
+                                                <Setter Property="Content" Value="Deactivate"/>
+                                                <Setter Property="Background" Value="{StaticResource ErrorRed}"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                        <Setter Property="Content" Value="Activate"/>
+                                                        <Setter Property="Background" Value="{StaticResource SuccessGreen}"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Button.Style>
+                                    </Button>
+                                    <Button Content="Permissions" Width="100" Height="32" Margin="5,0" 
+                                            Background="{StaticResource WarningYellow}" Foreground="Black" 
+                                            BorderThickness="0" Cursor="Hand" FontWeight="Bold" 
+                                            Tag="{Binding UserId}" Click="ManagePermissions_Click"/>
+                                </StackPanel>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </Border>
+    </Grid>
+</Window>

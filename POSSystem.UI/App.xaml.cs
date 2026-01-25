@@ -65,6 +65,7 @@ public partial class App : System.Windows.Application
         // Services
         services.AddScoped<IProductService, ProductService>();
         services.AddScoped<ISalesService, SalesService>();
+        services.AddScoped<IUserService, UserService>();
 
         // Windows (register as transient so new instances are created)
         services.AddTransient<MainWindow>();
