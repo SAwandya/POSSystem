@@ -33,6 +33,9 @@ public class CreateSaleDto
     public decimal TaxAmount { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal GrandTotal { get; set; }
+
+    //Payment Type newly added by Nisindu
+    public string PaymentType { get; set; } = "On Day";
     public string PaymentMethod { get; set; } = "Cash";
     public decimal AmountPaid { get; set; }
     public List<CreateSaleItemDto> Items { get; set; } = new();
