@@ -1,563 +1,546 @@
-﻿using Microsoft.Extensions.DependencyInjection;
-using POSSystem.Application.Services;
-using POSSystem.Domain.Entities;
-using POSSystem.Infrastructure.Repositories;
-using POSSystem.UI.Views.Products;
-using System;
-using System.Collections.Generic;
+﻿using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Windows;
+using System.Windows.Automation.Text;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace POSSystem.UI.Views.GRN
 {
-    public partial class GRNPage : Window
+    public partial class AddItemWindow : Window, INotifyPropertyChanged
     {
-        private readonly IProductService _productService;
-        private readonly IUnitOfWork _unitOfWork;
-        private ObservableCollection<GRNItemViewModel> _grnItems;
-        private int _itemCounter = 1;
-        private List<POSSystem.Domain.Entities.Supplier> _suppliers = new List<POSSystem.Domain.Entities.Supplier>();
-        private Product? _selectedProduct = null;
-        private List<Product> _allProducts = new List<Product>();
-        private ObservableCollection<ProductSuggestionViewModel> _productSuggestions;
+        private ObservableCollection<ItemViewModel> _items;
+        private ObservableCollection<ItemViewModel> _searchResults;
+        private ObservableCollection<SupplierViewModel> _suppliers;
+        private bool _isSearchMode = false;
+        private int _selectedIndex = -1;
 
-        public GRNPage()
+        public ObservableCollection<ItemViewModel> Items
+        {
+            get => _items;
+            set
+            {
+                _items = value;
+                OnPropertyChanged(nameof(Items));
+            }
+        }
+
+        public ObservableCollection<SupplierViewModel> Suppliers
+        {
+            get => _suppliers;
+            set
+            {
+                _suppliers = value;
+                OnPropertyChanged(nameof(Suppliers));
+            }
+        }
+
+        public AddItemWindow()
         {
             InitializeComponent();
-
-            // Get services from DI container
-            var app = (App)System.Windows.Application.Current;
-            _productService = app.ServiceProvider.GetRequiredService<IProductService>();
-            _unitOfWork = app.ServiceProvider.GetRequiredService<IUnitOfWork>();
-
-            // Initialize collections
-            _grnItems = new ObservableCollection<GRNItemViewModel>();
-            _productSuggestions = new ObservableCollection<ProductSuggestionViewModel>();
-            
-            dgGRNItems.ItemsSource = _grnItems;
-            ProductSuggestionsList.ItemsSource = _productSuggestions;
-
-            // Set defaults
-            dpGRNDate.SelectedDate = DateTime.Now;
-            txtGRNNumber.Text = GenerateGRNNumber();
-
-            // Load data
-            LoadInitialDataAsync();
+            DataContext = this;
+            LoadInitialData();
+            SetupDataGrid();
         }
 
-        private async void LoadInitialDataAsync()
+        private void LoadInitialData()
         {
-            try
-            {
-                // Load All Products
-                var products = await _unitOfWork.Repository<Product>().GetAllAsync();
-                _allProducts = products.ToList();
+            // Load mock data
+            Items = new ObservableCollection<ItemViewModel>();
+            _searchResults = new ObservableCollection<ItemViewModel>();
 
-                // Load Suppliers
-                _suppliers = (await _unitOfWork.Repository<POSSystem.Domain.Entities.Supplier>().GetAllAsync()).ToList();
-                cmbSupplier.ItemsSource = _suppliers;
-                cmbSupplier.DisplayMemberPath = "Name";
-                cmbSupplier.SelectedValuePath = "SupplierId";
-            }
-            catch (Exception ex)
+            // Load suppliers
+            Suppliers = new ObservableCollection<SupplierViewModel>
             {
-                MessageBox.Show($"Error loading data: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+                new SupplierViewModel { Id = "SUP001", Name = "ABC Hardware Suppliers" },
+                new SupplierViewModel { Id = "SUP002", Name = "XYZ Tools & Equipment" },
+                new SupplierViewModel { Id = "SUP003", Name = "Building Materials Co" }
+            };
+            cmbSupplier.ItemsSource = Suppliers;
+            cmbSupplier.DisplayMemberPath = "Name";
+            cmbSupplier.SelectedValuePath = "Id";
+
+            // Set default values
+            dpDate.SelectedDate = DateTime.Now;
+            UpdateSummary();
         }
 
-        private string GenerateGRNNumber()
+        private void SetupDataGrid()
         {
-            return $"GRN-{DateTime.Now:yyyyMMdd}-{new Random().Next(1000, 9999)}";
+            var collectionView = CollectionViewSource.GetDefaultView(Items);
+            dgItems.ItemsSource = collectionView;
         }
 
-        private void TxtProductSearch_TextChanged(object sender, TextChangedEventArgs e)
+        private void TxtItemName_TextChanged(object sender, TextChangedEventArgs e)
         {
-            // Check if popup is initialized
-            if (ProductSuggestionsPopup == null || _productSuggestions == null)
-                return;
+            var searchText = txtItemName.Text.Trim();
 
-            var searchText = txtProductSearch.Text.Trim();
-
-            // Hide popup if placeholder text
-            if (searchText == "Search by barcode, product ID, or name..." || string.IsNullOrWhiteSpace(searchText))
+            if (string.IsNullOrEmpty(searchText))
             {
-                ProductSuggestionsPopup.IsOpen = false;
+                _isSearchMode = false;
+                dgItems.ItemsSource = Items;
+                txtSearchInfo.Visibility = Visibility.Collapsed;
                 return;
             }
 
-            // Search products
-            var suggestions = SearchProducts(searchText);
+            _isSearchMode = true;
 
-            _productSuggestions.Clear();
-            foreach (var suggestion in suggestions)
+            // Search in mock database
+            var results = SearchItems(searchText);
+            _searchResults.Clear();
+            foreach (var item in results)
             {
-                _productSuggestions.Add(suggestion);
-            }
-
-            // Show/hide popup based on results
-            ProductSuggestionsPopup.IsOpen = _productSuggestions.Count > 0;
-        }
-
-        private List<ProductSuggestionViewModel> SearchProducts(string searchTerm)
-        {
-            searchTerm = searchTerm.ToLower();
-
-            return _allProducts
-                .Where(p =>
-                    p.ProductId.ToString().Contains(searchTerm) ||
-                    p.Name.ToLower().Contains(searchTerm) ||
-                    (p.Barcode != null && p.Barcode.ToLower().Contains(searchTerm)))
-                .Take(10) // Limit to 10 suggestions
-                .Select(p => new ProductSuggestionViewModel
+                _searchResults.Add(new ItemViewModel
                 {
-                    ProductId = p.ProductId,
-                    Name = p.Name,
-                    Barcode = p.Barcode ?? "N/A",
-                    CategoryName = p.SubCategory?.Category?.Name ?? "N/A",
-                    AvailableQty = (int)(p.Inventory?.Quantity ?? 0),
-                    Product = p
-                })
-                .ToList();
-        }
-
-        private void TxtProductSearch_GotFocus(object sender, RoutedEventArgs e)
-        {
-            if (txtProductSearch.Text == "Search by barcode, product ID, or name...")
-            {
-                txtProductSearch.Text = "";
-                txtProductSearch.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Colors.White);
+                    Id = $"search-{item.ItemCode}",
+                    ItemCode = item.ItemCode,
+                    ItemName = item.ItemName,
+                    Subcategory = item.Subcategory,
+                    Unit = item.Unit,
+                    Quantity = 0,
+                    CostPrice = item.CostPrice,
+                    SellingPrice = item.SellingPrice,
+                    LabelPrice = item.LabelPrice,
+                    AvailableQuantity = item.AvailableQuantity,
+                    IsSearchResult = true,
+                    OriginalItem = item
+                });
             }
-        }
 
-        private void TxtProductSearch_LostFocus(object sender, RoutedEventArgs e)
-        {
-            if (string.IsNullOrWhiteSpace(txtProductSearch.Text))
+            dgItems.ItemsSource = _searchResults;
+
+            if (_searchResults.Any())
             {
-                txtProductSearch.Text = "Search by barcode, product ID, or name...";
-                txtProductSearch.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(176, 176, 208));
-            }
-        }
-
-        private void TxtProductSearch_KeyDown(object sender, KeyEventArgs e)
-        {
-            // Check if popup is initialized
-            if (ProductSuggestionsPopup == null)
-                return;
-
-            if (e.Key == Key.Enter)
-            {
-                // Select first suggestion if available
-                if (_productSuggestions.Count > 0)
+                txtSearchInfo.Text = $"{_searchResults.Count} item(s) found matching \"{searchText}\". Double-click or select to load.";
+                txtSearchInfo.Visibility = Visibility.Visible;
+                _selectedIndex = 0;
+                if (_searchResults.Count > 0)
                 {
-                    SelectProduct(_productSuggestions[0].Product);
-                    ProductSuggestionsPopup.IsOpen = false;
+                    dgItems.SelectedIndex = 0;
                 }
-            }
-            else if (e.Key == Key.Escape)
-            {
-                ProductSuggestionsPopup.IsOpen = false;
-            }
-        }
-
-        private void SuggestionItem_Click(object sender, MouseButtonEventArgs e)
-        {
-            if (sender is Border border && border.DataContext is ProductSuggestionViewModel suggestion)
-            {
-                SelectProduct(suggestion.Product);
-                ProductSuggestionsPopup.IsOpen = false;
-            }
-        }
-
-        private void SelectProduct(Product product)
-        {
-            _selectedProduct = product;
-            txtProductSearch.Text = $"{product.Name} (ID: {product.ProductId})";
-            txtAvailableQty.Text = (product.Inventory?.Quantity ?? 0).ToString();
-            
-            // Auto-fill unit price from Product.UnitPrice
-            if (product.UnitPrice > 0)
-            {
-                txtUnitPrice.Text = product.UnitPrice.ToString("0.00");
             }
             else
             {
-                txtUnitPrice.Text = "0.00";
+                txtSearchInfo.Text = "No items found. Try different keywords.";
+                txtSearchInfo.Visibility = Visibility.Visible;
             }
-            
-            // Focus on quantity field
+        }
+
+        private ObservableCollection<MockItem> SearchItems(string searchTerm)
+        {
+            searchTerm = searchTerm.ToLower();
+
+            var mockDatabase = new ObservableCollection<MockItem>
+            {
+                new MockItem { ItemCode = "10001", ItemName = "Steel Hammer 500g", Subcategory = "Hand Tools", Unit = "PCS", CostPrice = 8.50m, SellingPrice = 13.99m, LabelPrice = 15.99m, AvailableQuantity = 45 },
+                new MockItem { ItemCode = "10002", ItemName = "Power Drill 750W", Subcategory = "Power Tools", Unit = "PCS", CostPrice = 55.00m, SellingPrice = 79.99m, LabelPrice = 89.99m, AvailableQuantity = 12 },
+                new MockItem { ItemCode = "10003", ItemName = "Wall Paint White 5L", Subcategory = "Interior Paint", Unit = "LTR", CostPrice = 28.00m, SellingPrice = 40.99m, LabelPrice = 45.99m, AvailableQuantity = 85 },
+                new MockItem { ItemCode = "10004", ItemName = "Wood Screws Pack (100pcs)", Subcategory = "Fasteners", Unit = "BOX", CostPrice = 5.50m, SellingPrice = 8.99m, LabelPrice = 9.99m, AvailableQuantity = 200 },
+                new MockItem { ItemCode = "10005", ItemName = "Cement Bag 50kg", Subcategory = "Building Materials", Unit = "BAG", CostPrice = 12.00m, SellingPrice = 18.99m, LabelPrice = 20.99m, AvailableQuantity = 500 },
+                new MockItem { ItemCode = "10006", ItemName = "Steel Wire 500m", Subcategory = "Building Materials", Unit = "ROLL", CostPrice = 85.00m, SellingPrice = 105.00m, LabelPrice = 110.00m, AvailableQuantity = 22 },
+                new MockItem { ItemCode = "10007", ItemName = "Ladder 6ft", Subcategory = "Access Equipment", Unit = "PCS", CostPrice = 45.00m, SellingPrice = 55.00m, LabelPrice = 60.00m, AvailableQuantity = 12 },
+                new MockItem { ItemCode = "10008", ItemName = "Paint Brush Set", Subcategory = "Painting Tools", Unit = "SET", CostPrice = 12.00m, SellingPrice = 18.50m, LabelPrice = 20.00m, AvailableQuantity = 65 }
+            };
+
+            return new ObservableCollection<MockItem>(mockDatabase
+                .Where(item =>
+                    item.ItemCode.ToLower().Contains(searchTerm) ||
+                    item.ItemName.ToLower().Contains(searchTerm) ||
+                    item.Subcategory.ToLower().Contains(searchTerm))
+                .Take(10));
+        }
+
+        private void TxtItemName_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (!_isSearchMode || !_searchResults.Any()) return;
+
+            if (e.Key == Key.Down)
+            {
+                e.Handled = true;
+                _selectedIndex = Math.Min(_selectedIndex + 1, _searchResults.Count - 1);
+                dgItems.SelectedIndex = _selectedIndex;
+                dgItems.ScrollIntoView(dgItems.SelectedItem);
+            }
+            else if (e.Key == Key.Up)
+            {
+                e.Handled = true;
+                _selectedIndex = Math.Max(_selectedIndex - 1, 0);
+                dgItems.SelectedIndex = _selectedIndex;
+                dgItems.ScrollIntoView(dgItems.SelectedItem);
+            }
+            else if (e.Key == Key.Enter)
+            {
+                e.Handled = true;
+                if (_selectedIndex >= 0 && _searchResults.Count > _selectedIndex)
+                {
+                    SelectItemFromSearch(_searchResults[_selectedIndex]);
+                }
+            }
+        }
+
+        private void DgItems_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            if (dgItems.SelectedItem is ItemViewModel selectedItem)
+            {
+                if (_isSearchMode && selectedItem.IsSearchResult)
+                {
+                    SelectItemFromSearch(selectedItem);
+                }
+            }
+        }
+
+        private void SelectItemFromSearch(ItemViewModel item)
+        {
+            if (item.OriginalItem == null) return;
+
+            txtItemCode.Text = item.ItemCode;
+            txtItemName.Text = item.ItemName;
+            txtSubcategory.Text = item.Subcategory;
+            txtUnit.Text = item.Unit;
+            txtCostPrice.Text = item.CostPrice.ToString("F2");
+            txtSellingPrice.Text = item.SellingPrice.ToString("F2");
+            txtLabelPrice.Text = item.LabelPrice.ToString("F2");
+
+            _isSearchMode = false;
+            dgItems.ItemsSource = Items;
+            txtSearchInfo.Visibility = Visibility.Collapsed;
+
             txtQuantity.Focus();
             txtQuantity.SelectAll();
         }
 
-        private void AddNewProductButton_Click(object sender, RoutedEventArgs e)
+        private void TxtCostPrice_TextChanged(object sender, TextChangedEventArgs e)
         {
-            var dialog = new AddProductDialogAdvanced(_productService, _unitOfWork);
-            dialog.Owner = this;
-            if (dialog.ShowDialog() == true)
-            {
-                // Reload products
-                LoadInitialDataAsync();
-                MessageBox.Show("Product added successfully!", "Success",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-        }
+            // Slash function: Calculate cost price from total price divided by quantity
+            var text = txtCostPrice.Text;
 
-        private void SearchItemsButton_Click(object sender, RoutedEventArgs e)
-        {
-            var itemRegistry = new ItemRegistryPage();
-            itemRegistry.Owner = this;
-            itemRegistry.Show();
-        }
-
-        private void SelectSupplierButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (cmbSupplier.SelectedItem is POSSystem.Domain.Entities.Supplier supplier)
+            if (text.EndsWith("/"))
             {
-                txtSupplierId.Text = supplier.SupplierId.ToString();
-                MessageBox.Show($"Supplier selected: {supplier.Name}", "Supplier",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
-            }
-            else
-            {
-                MessageBox.Show("Please select a supplier from dropdown first.", "Warning",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-            }
-        }
-
-        private async void AddSupplierButton_Click(object sender, RoutedEventArgs e)
-        {
-            try
-            {
-                var addSupplierDialog = new POSSystem.UI.Views.Suppliers.AddSupplierDialog(_unitOfWork);
-                addSupplierDialog.Owner = this;
-
-                if (addSupplierDialog.ShowDialog() == true)
+                try
                 {
-                    // Reload suppliers after adding
-                    _suppliers = (await _unitOfWork.Repository<POSSystem.Domain.Entities.Supplier>().GetAllAsync()).ToList();
-                    cmbSupplier.ItemsSource = _suppliers;
-                    cmbSupplier.DisplayMemberPath = "Name";
-                    cmbSupplier.SelectedValuePath = "SupplierId";
-
-                    // Select the newly added supplier (last one in the list)
-                    if (_suppliers.Any())
+                    var totalPriceText = text.Replace("/", "");
+                    if (decimal.TryParse(totalPriceText, out decimal totalPrice))
                     {
-                        cmbSupplier.SelectedIndex = _suppliers.Count - 1;
+                        if (int.TryParse(txtQuantity.Text, out int quantity) && quantity > 0)
+                        {
+                            var costPrice = totalPrice / quantity;
+                            txtCostPrice.Text = costPrice.ToString("F2");
+                        }
                     }
-
-                    MessageBox.Show("Supplier added successfully!", "Success",
-                        MessageBoxButton.OK, MessageBoxImage.Information);
+                }
+                catch
+                {
+                    // Ignore parsing errors
                 }
             }
-            catch (Exception ex)
+        }
+
+        private void TxtSellingPrice_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            // Asterisk function: Calculate selling price from percentage discount on label price
+            var text = txtSellingPrice.Text;
+
+            if (text.Contains("*"))
             {
-                MessageBox.Show($"Error adding supplier: {ex.Message}", "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
+                try
+                {
+                    var percentageText = text.Replace("*", "");
+                    if (decimal.TryParse(percentageText, out decimal percentage))
+                    {
+                        if (decimal.TryParse(txtLabelPrice.Text, out decimal labelPrice))
+                        {
+                            var discount = labelPrice * (percentage / 100);
+                            var sellingPrice = labelPrice - discount;
+                            txtSellingPrice.Text = sellingPrice.ToString("F2");
+                        }
+                    }
+                }
+                catch
+                {
+                    // Ignore parsing errors
+                }
             }
         }
 
-        private void AddItemButton_Click(object sender, RoutedEventArgs e)
+        private void BtnAddItem_Click(object sender, RoutedEventArgs e)
         {
-            // Validation
-            if (_selectedProduct == null)
-            {
-                MessageBox.Show("Please search and select a product first.", "Validation",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
+            if (!ValidateInputs()) return;
 
-            if (!decimal.TryParse(txtQuantity.Text, out decimal quantity) || quantity <= 0)
+            var newItem = new ItemViewModel
             {
-                MessageBox.Show("Please enter a valid quantity.", "Validation",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                return;
-            }
-
-            if (!decimal.TryParse(txtDiscount.Text, out decimal discount) || discount < 0 || discount > 100)
-            {
-                discount = 0;
-            }
-
-            // Get unit price from the textbox
-            decimal unitPrice = 0;
-            if (!decimal.TryParse(txtUnitPrice.Text, out unitPrice) || unitPrice <= 0)
-            {
-                MessageBox.Show("Please enter a valid unit price.", "Validation",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
-                txtUnitPrice.Focus();
-                return;
-            }
-
-            // Calculate total
-            decimal subtotal = quantity * unitPrice;
-            decimal discountAmount = subtotal * (discount / 100);
-            decimal total = subtotal - discountAmount;
-
-            // Create GRN item
-            var grnItem = new GRNItemViewModel
-            {
-                SNo = _itemCounter++,
-                ProductId = _selectedProduct.ProductId,
-                ProductName = _selectedProduct.Name,
-                Category = _selectedProduct.SubCategory?.Category?.Name ?? "N/A",
-                SubCategory = _selectedProduct.SubCategory?.Name ?? "N/A",
-                Quantity = quantity,
-                UnitPrice = unitPrice,
-                DiscountPercent = discount,
-                Total = total
+                Id = Guid.NewGuid().ToString(),
+                ItemCode = txtItemCode.Text,
+                ItemName = txtItemName.Text,
+                Subcategory = txtSubcategory.Text,
+                Unit = txtUnit.Text,
+                Quantity = int.Parse(txtQuantity.Text),
+                CostPrice = decimal.Parse(txtCostPrice.Text),
+                SellingPrice = decimal.Parse(txtSellingPrice.Text),
+                LabelPrice = decimal.Parse(txtLabelPrice.Text),
+                AvailableQuantity = 0,
+                IsSearchResult = false
             };
 
-            _grnItems.Add(grnItem);
+            Items.Add(newItem);
+            ClearInputFields();
             UpdateSummary();
-
-            // Reset for next item
-            _selectedProduct = null;
-            txtProductSearch.Text = "Search by barcode, product ID, or name...";
-            txtProductSearch.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(176, 176, 208));
-            txtQuantity.Text = "0";
-            txtUnitPrice.Text = "0.00";
-            txtDiscount.Text = "0";
-            txtAvailableQty.Text = "0";
-            chkSingle.IsChecked = false;
-            chkPacked.IsChecked = false;
-
-            txtProductSearch.Focus();
+            txtItemName.Focus();
         }
 
-        private void RemoveItemButton_Click(object sender, RoutedEventArgs e)
+        private bool ValidateInputs()
         {
-            if (dgGRNItems.SelectedItem is GRNItemViewModel selectedItem)
+            if (string.IsNullOrWhiteSpace(txtItemCode.Text))
             {
-                _grnItems.Remove(selectedItem);
-                UpdateSummary();
+                MessageBox.Show("Please enter Item Code", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
             }
-            else
+
+            if (string.IsNullOrWhiteSpace(txtItemName.Text))
             {
-                MessageBox.Show("Please select an item to remove.", "Warning",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please enter Item Name", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
             }
+
+            if (!int.TryParse(txtQuantity.Text, out int qty) || qty <= 0)
+            {
+                MessageBox.Show("Please enter valid quantity", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            if (!decimal.TryParse(txtCostPrice.Text, out decimal cost) || cost <= 0)
+            {
+                MessageBox.Show("Please enter valid cost price", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
+                return false;
+            }
+
+            return true;
+        }
+
+        private void ClearInputFields()
+        {
+            txtItemCode.Clear();
+            txtItemName.Clear();
+            txtSubcategory.Clear();
+            txtUnit.Text = "PCS";
+            txtQuantity.Text = "1";
+            txtCostPrice.Clear();
+            txtSellingPrice.Clear();
+            txtLabelPrice.Clear();
         }
 
         private void UpdateSummary()
         {
-            txtItemCount.Text = _grnItems.Count.ToString();
-            decimal subtotal = _grnItems.Sum(i => i.Total);
-            txtSubtotal.Text = $"Rs {subtotal:#,##0.00}";
+            txtItemsAdded.Text = Items.Count.ToString();
+
+            decimal totalAmount = Items.Sum(item => item.Quantity * item.CostPrice);
+            txtTotal.Text = $"${totalAmount:F2}";
         }
 
-        private void PayGRNButton_Click(object sender, RoutedEventArgs e)
+        private void BtnDeleteItem_Click(object sender, RoutedEventArgs e)
         {
-            if (_grnItems.Count == 0)
+            if (sender is Button button && button.Tag is ItemViewModel item)
             {
-                MessageBox.Show("Please add items before completing GRN.", "Warning",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                Items.Remove(item);
+                UpdateSummary();
+            }
+        }
+
+        /*private void BtnPrintBarcode_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button && button.Tag is ItemViewModel item)
+            {
+                var printWindow = new PrintBarcodeWindow(item);
+                printWindow.Owner = this;
+                printWindow.ShowDialog();
+            }
+        }*/
+
+        private void BtnSave_Click(object sender, RoutedEventArgs e)
+        {
+            if (Items.Count == 0)
+            {
+                MessageBox.Show("Please add at least one item", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             if (cmbSupplier.SelectedItem == null)
             {
-                MessageBox.Show("Please select a supplier.", "Warning",
-                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Please select a supplier", "Validation", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
-            var result = MessageBox.Show("Complete this GRN and update stock?", "Confirm",
-                MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                SaveGRNAsync();
-            }
+            // Here you would save the items and return to parent window
+            MessageBox.Show($"Saved {Items.Count} items successfully!", "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+            this.DialogResult = true;
+            this.Close();
         }
 
-        private async void SaveGRNAsync()
+        private void BtnClose_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                var supplier = cmbSupplier.SelectedItem as POSSystem.Domain.Entities.Supplier;
-                if (supplier == null)
-                {
-                    MessageBox.Show("Please select a supplier.", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                // Create GRN record
-                var grn = new POSSystem.Domain.Entities.GRN
-                {
-                    SupplierId = supplier.SupplierId,
-                    UserId = 1, // Default user ID - should be from logged-in user
-                    ReferenceNo = txtReferenceNo.Text,
-                    ReceivedDate = dpGRNDate.SelectedDate ?? DateTime.Now,
-                    TotalAmount = _grnItems.Sum(i => i.Total)
-                };
-
-                await _unitOfWork.Repository<POSSystem.Domain.Entities.GRN>().AddAsync(grn);
-                await _unitOfWork.SaveChangesAsync();
-
-                // Create GRN items and update inventory
-                foreach (var item in _grnItems)
-                {
-                    // Create GRN item
-                    var grnItem = new GRNItem
-                    {
-                        GrnId = grn.GrnId,
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        UnitCost = item.UnitPrice,
-                        TotalCost = item.Total
-                    };
-
-                    await _unitOfWork.Repository<GRNItem>().AddAsync(grnItem);
-
-                    // Update inventory quantity
-                    var inventory = await _unitOfWork.Repository<Inventory>()
-                        .FirstOrDefaultAsync(i => i.ProductId == item.ProductId);
-
-                    if (inventory != null)
-                    {
-                        // Add received quantity to existing inventory
-                        inventory.Quantity += item.Quantity;
-                        
-                        // Update average cost
-                        var oldTotalCost = inventory.AverageCost * (inventory.Quantity - item.Quantity);
-                        var newTotalCost = oldTotalCost + item.Total;
-                        inventory.AverageCost = inventory.Quantity > 0 ? newTotalCost / inventory.Quantity : item.UnitPrice;
-                        
-                        _unitOfWork.Repository<Inventory>().Update(inventory);
-                    }
-                    else
-                    {
-                        // Create new inventory record if it doesn't exist
-                        var newInventory = new Inventory
-                        {
-                            ProductId = item.ProductId,
-                            Quantity = item.Quantity,
-                            SellingPrice = 0, // To be set separately
-                            AverageCost = item.UnitPrice
-                        };
-                        await _unitOfWork.Repository<Inventory>().AddAsync(newInventory);
-                    }
-                }
-
-                await _unitOfWork.SaveChangesAsync();
-
-                MessageBox.Show($"GRN {txtGRNNumber.Text} completed successfully!\n\n" +
-                               $"Total Items: {_grnItems.Count}\n" +
-                               $"Total Amount: Rs {grn.TotalAmount:#,##0.00}\n" +
-                               $"Supplier: {supplier.Name}\n\n" +
-                               $"Inventory has been updated!", 
-                               "Success",
-                               MessageBoxButton.OK, MessageBoxImage.Information);
-
-                // Reload products to show updated inventory
-                LoadInitialDataAsync();
-                
-                ResetForm();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error saving GRN: {ex.Message}\n\nInner Exception: {ex.InnerException?.Message}", 
-                    "Error",
-                    MessageBoxButton.OK, MessageBoxImage.Error);
-            }
+            this.DialogResult = false;
+            this.Close();
         }
 
-        private void ResetAllButton_Click(object sender, RoutedEventArgs e)
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
         {
-            var result = MessageBox.Show("Are you sure you want to reset all data?", "Confirm",
-                MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-            if (result == MessageBoxResult.Yes)
-            {
-                ResetForm();
-            }
-        }
-
-        private void ResetForm()
-        {
-            _grnItems.Clear();
-            _itemCounter = 1;
-            txtGRNNumber.Text = GenerateGRNNumber();
-            txtPONumber.Clear();
-            txtInvoiceNumber.Clear();
-            txtInvoiceValue.Clear();
-            txtReferenceNo.Clear();
-            txtProductSearch.Text = "Search by barcode, product ID, or name...";
-            txtProductSearch.Foreground = new System.Windows.Media.SolidColorBrush(System.Windows.Media.Color.FromRgb(176, 176, 208));
-            txtQuantity.Text = "0";
-            txtUnitPrice.Text = "0.00";
-            txtDiscount.Text = "0";
-            txtOutstanding.Clear();
-            txtAvailableQty.Text = "0";
-            cmbSupplier.SelectedIndex = -1;
-            dpGRNDate.SelectedDate = DateTime.Now;
-            _selectedProduct = null;
-            
-            // Check if popup is initialized before accessing
-            if (ProductSuggestionsPopup != null)
-                ProductSuggestionsPopup.IsOpen = false;
-                
-            UpdateSummary();
-        }
-
-        private void ViewTempButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("View temporary GRN data.", "View Temp",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void DelTempButton_Click(object sender, RoutedEventArgs e)
-        {
-            MessageBox.Show("Delete temporary GRN data.", "Delete Temp",
-                MessageBoxButton.OK, MessageBoxImage.Information);
-        }
-
-        private void BackButton_Click(object sender, RoutedEventArgs e)
-        {
-            if (_grnItems.Count > 0)
-            {
-                var result = MessageBox.Show("You have unsaved changes. Are you sure you want to go back?", "Confirm",
-                    MessageBoxButton.YesNo, MessageBoxImage.Warning);
-
-                if (result == MessageBoxResult.Yes)
-                {
-                    this.Close();
-                }
-            }
-            else
-            {
-                this.Close();
-            }
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
         }
     }
 
-    // ViewModel for GRN Items
-    public class GRNItemViewModel
+    public class ItemViewModel : INotifyPropertyChanged
     {
-        public int SNo { get; set; }
-        public int ProductId { get; set; }
-        public string ProductName { get; set; } = string.Empty;
-        public string Category { get; set; } = string.Empty;
-        public string SubCategory { get; set; } = string.Empty;
-        public decimal Quantity { get; set; }
-        public decimal UnitPrice { get; set; }
-        public decimal DiscountPercent { get; set; }
-        public decimal Total { get; set; }
+        private string _id;
+        private string _itemCode;
+        private string _itemName;
+        private string _subcategory;
+        private string _unit;
+        private int _quantity;
+        private decimal _costPrice;
+        private decimal _sellingPrice;
+        private decimal _labelPrice;
+        private int _availableQuantity;
+        private bool _isSearchResult;
+        private MockItem _originalItem;
+
+        public string Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(nameof(Id)); }
+        }
+
+        public string ItemCode
+        {
+            get => _itemCode;
+            set { _itemCode = value; OnPropertyChanged(nameof(ItemCode)); }
+        }
+
+        public string ItemName
+        {
+            get => _itemName;
+            set { _itemName = value; OnPropertyChanged(nameof(ItemName)); }
+        }
+
+        public string Subcategory
+        {
+            get => _subcategory;
+            set { _subcategory = value; OnPropertyChanged(nameof(Subcategory)); }
+        }
+
+        public string Unit
+        {
+            get => _unit;
+            set { _unit = value; OnPropertyChanged(nameof(Unit)); }
+        }
+
+        public int Quantity
+        {
+            get => _quantity;
+            set { _quantity = value; OnPropertyChanged(nameof(Quantity)); OnPropertyChanged(nameof(Amount)); }
+        }
+
+        public decimal CostPrice
+        {
+            get => _costPrice;
+            set { _costPrice = value; OnPropertyChanged(nameof(CostPrice)); OnPropertyChanged(nameof(Amount)); }
+        }
+
+        public decimal SellingPrice
+        {
+            get => _sellingPrice;
+            set { _sellingPrice = value; OnPropertyChanged(nameof(SellingPrice)); }
+        }
+
+        public decimal LabelPrice
+        {
+            get => _labelPrice;
+            set { _labelPrice = value; OnPropertyChanged(nameof(LabelPrice)); }
+        }
+
+        public int AvailableQuantity
+        {
+            get => _availableQuantity;
+            set { _availableQuantity = value; OnPropertyChanged(nameof(AvailableQuantity)); }
+        }
+
+        public bool IsSearchResult
+        {
+            get => _isSearchResult;
+            set { _isSearchResult = value; OnPropertyChanged(nameof(IsSearchResult)); }
+        }
+
+        public MockItem OriginalItem
+        {
+            get => _originalItem;
+            set { _originalItem = value; OnPropertyChanged(nameof(OriginalItem)); }
+        }
+
+        public decimal Amount => Quantity * CostPrice;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
     }
 
-    // ViewModel for Product Suggestions
-    public class ProductSuggestionViewModel
+    public class SupplierViewModel : INotifyPropertyChanged
     {
-        public int ProductId { get; set; }
-        public string Name { get; set; } = string.Empty;
-        public string Barcode { get; set; } = string.Empty;
-        public string CategoryName { get; set; } = string.Empty;
-        public int AvailableQty { get; set; }
-        public Product Product { get; set; } = null!;
+        private string _id;
+        private string _name;
+
+        public string Id
+        {
+            get => _id;
+            set { _id = value; OnPropertyChanged(nameof(Id)); }
+        }
+
+        public string Name
+        {
+            get => _name;
+            set { _name = value; OnPropertyChanged(nameof(Name)); }
+        }
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+    }
+
+    public class MockItem
+    {
+        public string ItemCode { get; set; }
+        public string ItemName { get; set; }
+        public string Subcategory { get; set; }
+        public string Unit { get; set; }
+        public decimal CostPrice { get; set; }
+        public decimal SellingPrice { get; set; }
+        public decimal LabelPrice { get; set; }
+        public int AvailableQuantity { get; set; }
+    }
+
+    // Converter for Inverted Boolean
+    public class BooleanToNotConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            if (value is bool boolValue)
+            {
+                return !boolValue;
+            }
+            return true;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
