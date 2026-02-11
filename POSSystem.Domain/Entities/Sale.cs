@@ -43,7 +43,11 @@ public class Payment
     public int PaymentId { get; set; }
     public int SaleId { get; set; }
     public decimal Amount { get; set; }
+
     public PaymentMethod PaymentMethod { get; set; }
+
+    public PaymentType PaymentType { get; set; } = PaymentType.OnDay;
+
     public DateTime PaymentDate { get; set; } = DateTime.Now;
 
     // Navigation Properties
@@ -62,5 +66,14 @@ public enum PaymentMethod
     Cash,
     Card,
     Transfer,
-    Credit
+    
 }
+
+public enum PaymentType
+{
+    OnDay,   // paid immediately
+    Credit   // payment deferred / due later
+}
+
+
+//Nisindu- added payment type and moved credit to payment type enum, as it is more appropriate to be there. Payment method should only have cash, card and transfer.
