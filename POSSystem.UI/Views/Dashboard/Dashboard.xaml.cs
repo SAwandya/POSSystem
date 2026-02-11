@@ -4,10 +4,12 @@ using POSSystem.UI.Views.GRN;
 using POSSystem.UI.Views.inventory;
 using POSSystem.UI.Views.Products;
 using POSSystem.UI.Views.Reports;
+using POSSystem.UI.Views.Sales;
 using POSSystem.UI.Views.Stock;
 using System;
 using System.Windows;
 using System.Windows.Controls;
+
 
 namespace POSSystem.UI.Views.Dashboard
 {
@@ -105,7 +107,7 @@ namespace POSSystem.UI.Views.Dashboard
         {
             try
             {
-                var grnWindow = new GRNPage();
+                var grnWindow = new AddItemWindow();
                 grnWindow.Show();
             }
             catch (Exception ex)
@@ -213,6 +215,34 @@ namespace POSSystem.UI.Views.Dashboard
         private void RefreshButton_Click(object sender, RoutedEventArgs e)
         {
             ShowMessage("Refresh clicked");
+        }
+
+        
+
+private void OpenNewSaleClone_Click(object sender, RoutedEventArgs e)
+    {
+        var win = new NewSaleClone();
+        win.Show();
+        this.Close(); // optional
+    }
+
+
+        private void BtnNewSale_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Create and show the NewSaleTabs window
+                var newSaleWindow = new NewSaleTabs();
+                newSaleWindow.Show();
+
+                // Optionally, you can hide the dashboard if you want
+                // this.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Failed to open New Sale window.\n\n{ex.Message}", "Error",
+                    MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
 
         private void ShowMessage(string message)

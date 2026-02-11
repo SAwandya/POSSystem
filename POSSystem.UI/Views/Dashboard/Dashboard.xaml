@@ -646,7 +646,12 @@
                                 </StackPanel>
                             </Button>
 
-                            <!-- GRN -->
+                                <Button Content="New Sale Clone" Click="OpenNewSaleClone_Click"/>
+
+                                <Button x:Name="BtnNewSale" Content="New Sale" Width="120" Height="40" Click="BtnNewSale_Click"/>
+
+
+                                <!-- GRN -->
                             <Button x:Name="GRNButton" Style="{StaticResource ModernCardButton}" Click="GRNButton_Click">
                                 <StackPanel>
                                     <Border Width="50" Height="50" CornerRadius="12" 
