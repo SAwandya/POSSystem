@@ -83,6 +83,7 @@ public class SalesService : ISalesService
                 SaleId = sale.SaleId,
                 Amount = dto.AmountPaid,
                 PaymentMethod = Enum.Parse<PaymentMethod>(dto.PaymentMethod, true),
+                PaymentType = Enum.Parse<PaymentType>(dto.PaymentType, true),
                 PaymentDate = DateTime.Now
             };
 
