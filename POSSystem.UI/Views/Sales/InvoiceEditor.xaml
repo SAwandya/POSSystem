@@ -578,15 +578,19 @@
                             <RadioButton x:Name="rbOnDay"
                                          Content="  On Day"
                                          Foreground="{StaticResource TextPrimary}"
-                                         Margin="0,0,100,0"
+                                         Margin="0,0,40,0"
                                          GroupName="PaymentType"
                                          IsChecked="True"/>
 
                             <RadioButton x:Name="rbCredit"
                                          Content="  Credit"
                                          Foreground="{StaticResource TextPrimary}"
+                                         Margin="0,0,40,0"
                                          GroupName="PaymentType"/>
-                        </StackPanel>
+
+                      
+                            
+                            </StackPanel>
 
                         <TextBlock Text="Payment Method"
                                    FontSize="11"
