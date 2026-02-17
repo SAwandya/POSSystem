@@ -305,7 +305,7 @@
                                 <DataGridTextColumn Header="SKU" Width="120" Binding="{Binding SKU}"/>
                                 <DataGridTextColumn Header="Current Stock" Width="100" Binding="{Binding CurrentStock}"/>
                                 <DataGridTextColumn Header="Min Stock" Width="90" Binding="{Binding MinStock}"/>
-                                <DataGridTextColumn Header="Price" Width="100" Binding="{Binding Price, StringFormat=Rs {0:#,##0.00}}"/>
+                                <DataGridTextColumn Header="Price" Width="100" Binding="{Binding Price, StringFormat='Rs {0:#,##0.00}'}"/>
                                 <DataGridTemplateColumn Header="Status" Width="120">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
