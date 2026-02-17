@@ -46,7 +46,7 @@ public class Payment
 
     public PaymentMethod PaymentMethod { get; set; }
 
-    public string PaymentType { get; set; } = "OnDay";
+    public PaymentType PaymentType { get; set; } = PaymentType.OnDay;
 
     public DateTime PaymentDate { get; set; } = DateTime.Now;
 
@@ -72,8 +72,7 @@ public enum PaymentMethod
 public enum PaymentType
 {
     OnDay,   // paid immediately
-    Credit,
-
+    Credit   // payment deferred / due later
 }
 
 

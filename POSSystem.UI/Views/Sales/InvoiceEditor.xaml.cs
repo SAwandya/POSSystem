@@ -195,24 +195,15 @@ namespace POSSystem.UI.Views.Sales
                     p.Name.ToLower().Contains(searchTerm) ||
                     (!string.IsNullOrWhiteSpace(p.Barcode) && p.Barcode.ToLower().Contains(searchTerm)))
                 .Take(10)
-                .Select(p =>
-                { // qty already in invoice
-                    decimal alreadyInInvoice = _saleItems
-                        .Where(i => i.ProductId == p.ProductId)
-                        .Sum(i => i.Quantity);
-
-                    decimal remaining = p.Quantity - alreadyInInvoice;
-                    if (remaining < 0) remaining = 0;
-                    return new ProductSuggestionViewModel
-                    {
-                        ProductId = p.ProductId,
-                        Name = p.Name,
-                        Barcode = p.Barcode ?? "N/A",
-                        SellingPrice = p.SellingPrice,
-                        UnitPrice = p.UnitPrice,
-                        AvailableQty = (int)remaining,
-                        Product = p
-                    };
+                .Select(p => new ProductSuggestionViewModel
+                {
+                    ProductId = p.ProductId,
+                    Name = p.Name,
+                    Barcode = p.Barcode ?? "N/A",
+                    SellingPrice = p.SellingPrice,
+                    UnitPrice = p.UnitPrice,
+                    AvailableQty = (int)p.Quantity,
+                    Product = p
                 })
                 .ToList();
         }
@@ -387,11 +378,7 @@ namespace POSSystem.UI.Views.Sales
 
 
                 // Stock check
-                var existing = _saleItems.FirstOrDefault(i => i.ProductId == product.ProductId);
-
-                decimal alreadyInInvoice = existing?.Quantity ?? 0;
-
-                if (product.Quantity < (alreadyInInvoice + quantity))
+                if (product.Quantity < quantity)
                 {
                     MessageBox.Show($"Insufficient stock. Available: {product.Quantity}", "Stock Alert",
                         MessageBoxButton.OK, MessageBoxImage.Warning);
@@ -464,9 +451,6 @@ namespace POSSystem.UI.Views.Sales
                 MessageBox.Show($"Error adding item: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
             }
-
-          
-
         }
 
         private void RemoveItem_Click(object sender, RoutedEventArgs e)
@@ -483,9 +467,6 @@ namespace POSSystem.UI.Views.Sales
                     dgSaleItems.Items.Refresh();
                 }
             }
-
-            ProductSearch_TextChanged(null!, null!);
-
         }
 
         private void ClearAllButton_Click(object sender, RoutedEventArgs e)
@@ -650,7 +631,6 @@ namespace POSSystem.UI.Views.Sales
                 MessageBox.Show(msg, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
 
                 ResetSale();
-                LoadProductsAsync();
             }
         }
 

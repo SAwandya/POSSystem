@@ -461,118 +461,100 @@ namespace POSSystem.UI.Views.Sales
             AmountPaid_TextChanged(null!, null!);
         }
 
-
         // ---------------- Complete Sale ----------------
 
         private async void CompleteSaleButton_Click(object sender, RoutedEventArgs e)
         {
-            try
+            if (_saleItems.Count == 0)
             {
-                if (_saleItems.Count == 0)
-                {
-                    MessageBox.Show("Please add items to the sale.", "Validation",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                if (!decimal.TryParse(txtAmountPaid.Text, out decimal amountPaid))
-                {
-                    MessageBox.Show("Please enter a valid amount paid.", "Validation",
-                        MessageBoxButton.OK, MessageBoxImage.Warning);
-                    return;
-                }
-
-                string paymentType = rbOnDay.IsChecked == true ? "OnDay" : "Credit";
-
-
-
-                // Payment Method
-                string paymentMethod = "Cash";
-                if (rbCard.IsChecked == true) paymentMethod = "Card";
-                else if (rbTransfer.IsChecked == true) paymentMethod = "Transfer";
-
-                // Handle insufficient payment
-                if (paymentType == "On Day" && amountPaid < _grandTotal)
-                {
-                    var confirmResult = MessageBox.Show(
-                        $"Insufficient payment.\nRequired: Rs {_grandTotal:#,##0.00}\nPaid: Rs {amountPaid:#,##0.00}\n\nCreate credit sale instead?",
-                        "Payment Alert", MessageBoxButton.YesNo, MessageBoxImage.Question);
-
-                    if (confirmResult == MessageBoxResult.No)
-                        return;
-
-                    paymentType = "Credit";
-                }
-
-
-                // Get or create default user and session
-                int userId = await EnsureUserExistsAsync();
-                int sessionId = await EnsureSessionExistsAsync(userId);
-
-                // Create sale DTO
-                var createSaleDto = new CreateSaleDto
-                {
-                    CustomerId = null,
-                    UserId = userId,
-                    SessionId = sessionId,
-
-                    SubTotal = _subTotal,
-                    TaxAmount = _taxAmount,
-                    DiscountAmount = _discountAmount, // invoice-level discount
-                    GrandTotal = _grandTotal,
-
-                    PaymentType = paymentType,
-                    PaymentMethod = paymentMethod,
-                    AmountPaid = amountPaid,
-
-                    Items = _saleItems.Select(item => new CreateSaleItemDto
-                    {
-                        ProductId = item.ProductId,
-                        Quantity = item.Quantity,
-                        UnitPrice = item.UnitPrice
-
-                        // NOTE:
-                        // If your backend supports item discount fields,
-                        // you should also send DiscountPercent / DiscountAmount here.
-                    }).ToList()
-                };
-
-                // Process sale
-                var saleResult = await _salesService.CreateSaleAsync(createSaleDto);
-
-                if (!saleResult.Success)
-                {
-                    MessageBox.Show($"Sale Failed:\n\n{saleResult.Message}", "Error",
-                        MessageBoxButton.OK, MessageBoxImage.Error);
-                    return;
-                }
-
-                else if (saleResult.Success)
-                {
-                    decimal change = amountPaid - _grandTotal;
-
-                    string msg =
-                        $"SALE COMPLETED (UI Preview Mode)\n\n" +
-                        $"Invoice: {txtInvoiceNumber.Text}\n" +
-                        $"Payment Type: {paymentType}\n" +
-                        $"Payment Method: {paymentMethod}\n" +
-                        $"Total: Rs {_grandTotal:#,##0.00}\n" +
-                        $"Paid: Rs {amountPaid:#,##0.00}\n" +
-                        $"Change: Rs {change:#,##0.00}\n\n" +
-                        $"(No database save in preview mode)";
-
-                    MessageBox.Show(msg, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
-
-                    ResetSale();
-                }
+                MessageBox.Show("Please add items to the sale.", "Validation",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
             }
-            catch (Exception ex)
+
+            if (!decimal.TryParse(txtAmountPaid.Text, out decimal amountPaid))
             {
-                MessageBox.Show(
-                    $"Complete Sale crashed:\n\n{ex.Message}\n\n{ex.InnerException?.Message}",
-                    "Exception", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Please enter a valid amount paid.", "Validation",
+                    MessageBoxButton.OK, MessageBoxImage.Warning);
+                return;
+            }
+
+            // Payment Type
+            string paymentType = rbOnDay.IsChecked == true ? "On Day" : "Credit";
+
+            // Payment Method
+            string paymentMethod = "Cash";
+            if (rbCard.IsChecked == true) paymentMethod = "Card";
+            else if (rbTransfer.IsChecked == true) paymentMethod = "Transfer";
+
+            // Handle insufficient payment
+            if (paymentType == "On Day" && amountPaid < _grandTotal)
+            {
+                var confirmResult = MessageBox.Show(
+                    $"Insufficient payment.\nRequired: Rs {_grandTotal:#,##0.00}\nPaid: Rs {amountPaid:#,##0.00}\n\nCreate credit sale instead?",
+                    "Payment Alert", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (confirmResult == MessageBoxResult.No)
+                    return;
+
+                paymentType = "Credit";
+            }
+
+            // Get or create default user and session
+            int userId = await EnsureUserExistsAsync();
+            int sessionId = await EnsureSessionExistsAsync(userId);
+
+            // Create sale DTO
+            var createSaleDto = new CreateSaleDto
+            {
+                CustomerId = null,
+                UserId = userId,
+                SessionId = sessionId,
+
+                SubTotal = _subTotal,
+                TaxAmount = _taxAmount,
+                DiscountAmount = _discountAmount, // invoice-level discount
+                GrandTotal = _grandTotal,
+
+                PaymentType = paymentType,
+                PaymentMethod = paymentMethod,
+                AmountPaid = amountPaid,
+
+                Items = _saleItems.Select(item => new CreateSaleItemDto
+                {
+                    ProductId = item.ProductId,
+                    Quantity = item.Quantity,
+                    UnitPrice = item.UnitPrice
+
+                    // NOTE:
+                    // If your backend supports item discount fields,
+                    // you should also send DiscountPercent / DiscountAmount here.
+                }).ToList()
+            };
+
+            // Process sale
+            var saleResult = await _salesService.CreateSaleAsync(createSaleDto);
+
+            if (saleResult.Success)
+            {
+                decimal change = amountPaid - _grandTotal;
+
+                string msg =
+                    $"SALE COMPLETED (UI Preview Mode)\n\n" +
+                    $"Invoice: {txtInvoiceNumber.Text}\n" +
+                    $"Payment Type: {paymentType}\n" +
+                    $"Payment Method: {paymentMethod}\n" +
+                    $"Total: Rs {_grandTotal:#,##0.00}\n" +
+                    $"Paid: Rs {amountPaid:#,##0.00}\n" +
+                    $"Change: Rs {change:#,##0.00}\n\n" +
+                    $"(No database save in preview mode)";
+
+                MessageBox.Show(msg, "Success", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                ResetSale();
             }
         }
+
         private async Task<int> EnsureUserExistsAsync()
         {
             try

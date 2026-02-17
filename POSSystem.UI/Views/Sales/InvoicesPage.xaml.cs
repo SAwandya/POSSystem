@@ -513,7 +513,7 @@ namespace POSSystem.UI.Views.Sales
                 var newSalePage = new NewSalePage();
                 newSalePage.Show();
             }
-            catch (Exception ex)                                                               
+            catch (Exception ex)
             {
                 MessageBox.Show($"Error opening new sale page: {ex.Message}", "Error",
                     MessageBoxButton.OK, MessageBoxImage.Error);
