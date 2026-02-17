@@ -36,6 +36,21 @@ public class SalesService : ISalesService
             }
 
             // Create sale
+            PaymentStatus status;
+
+            if (dto.AmountPaid >= dto.GrandTotal)
+            {
+                status = PaymentStatus.Paid;
+            }
+            else if (dto.AmountPaid > 0)
+            {
+                status = PaymentStatus.Partial;
+            }
+            else
+            {
+                status = PaymentStatus.Pending;
+            }
+
             var sale = new Sale
             {
                 CustomerId = dto.CustomerId,
@@ -46,7 +61,7 @@ public class SalesService : ISalesService
                 TaxAmount = dto.TaxAmount,
                 DiscountAmount = dto.DiscountAmount,
                 GrandTotal = dto.GrandTotal,
-                PaymentStatus = PaymentStatus.Paid
+                PaymentStatus = status
             };
 
             await _unitOfWork.Sales.AddAsync(sale);
@@ -83,7 +98,7 @@ public class SalesService : ISalesService
                 SaleId = sale.SaleId,
                 Amount = dto.AmountPaid,
                 PaymentMethod = Enum.Parse<PaymentMethod>(dto.PaymentMethod, true),
-                PaymentType = Enum.Parse<PaymentType>(dto.PaymentType, true),
+                PaymentType = dto.PaymentType,
                 PaymentDate = DateTime.Now
             };
 
@@ -106,7 +121,8 @@ public class SalesService : ISalesService
             return new SaleResult
             {
                 Success = false,
-                Message = $"Error processing sale: {ex.Message}"
+                Message = $"Error processing sale:\n{ex.Message}\n{ex.InnerException?.Message}"
+
             };
         }
     }
